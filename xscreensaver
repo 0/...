@@ -1,0 +1,7 @@
+timeout: 2:00:00
+cycle: 0:00:00
+lock: True
+splash: False
+newLoginCommand:
+fade: False
+mode: blank

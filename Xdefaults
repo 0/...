@@ -1,0 +1,30 @@
+*.font: -*-fixed-medium-r-*-*-13-*-*-*-*-*-*-*
+*.boldFont: -*-fixed-bold-r-*-*-13-*-*-*-*-*-*-*
+
+*.background: #000000
+*.foreground: #ffffff
+*.highlightColor: #777777
+*.color0: #000000
+*.color1: #cc0000
+*.color2: #4e9a06
+*.color3: #c4a000
+*.color4: #3465a4
+*.color5: #75507b
+*.color6: #0b939b
+*.color7: #d3d7cf
+*.color8: #555753
+*.color9: #ef2929
+*.color10: #8ae234
+*.color11: #fce94f
+*.color12: #729fcf
+*.color13: #ad7fa8
+*.color14: #00f5e9
+*.color15: #eeeeec
+
+urxvt.iso14755_52: false
+urxvt.saveLines: 32767
+urxvt.scrollBar: false
+urxvt.scrollTtyKeypress: true
+urxvt.scrollTtyOutput: false
+urxvt.scrollWithBuffer: true
+urxvt.urgentOnBell: true

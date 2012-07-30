@@ -1,0 +1,38 @@
+[alias]
+	br = branch
+	co = checkout
+	df = diff
+	pop = stash pop --index
+	st = status
+	subup = submodule update --init --recursive
+	tree = log --graph --oneline --decorate
+[color]
+	ui = auto
+[core]
+	editor = vim
+	excludesfile = ~/.gitignore
+	pager = less -x4
+[grep]
+	lineNumber = true
+[help]
+	format = man
+[include]
+	path = ~/.gitconfig.local
+[merge]
+	conflictstyle = diff3
+	tool = splice
+[mergetool "splice"]
+	cmd = "gvim -f $BASE $LOCAL $REMOTE $MERGED -c 'SpliceInit'"
+	trustExitCode = true
+[push]
+	default = nothing
+[rebase]
+	autosquash = true
+[rerere]
+	enabled = true
+[remote "origin"]
+	skipDefaultUpdate = true
+[url "git://github.com/"]
+	insteadOf = gh:
+[url "git@github.com:"]
+	insteadOf = gh-ssh:

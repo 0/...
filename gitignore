@@ -1,4 +1,7 @@
 *~
+*.swo
 *.swp
 
 /tags
+
+.DS_Store

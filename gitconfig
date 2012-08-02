@@ -1,8 +1,10 @@
 [alias]
+	amend = commit --amend --reset-author
 	br = branch
 	co = checkout
 	df = diff
 	pop = stash pop --index
+	review = log -p -M --ignore-all-space --reverse
 	st = status
 	subup = submodule update --init --recursive
 	tree = log --graph --oneline --decorate
@@ -29,6 +31,7 @@
 [rebase]
 	autosquash = true
 [rerere]
+	autoupdate = true
 	enabled = true
 [remote "origin"]
 	skipDefaultUpdate = true

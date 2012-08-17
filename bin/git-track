@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+# Set up tracking for the current branch.
+
+if [[ -n "$1" ]]; then
+	remote="$1"
+else
+	remote='origin'
+fi
+
+branch="$(git symbolic-ref HEAD | cut -d/ -f3)"
+
+git branch --set-upstream "$branch" "${remote}/${branch}"

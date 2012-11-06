@@ -35,7 +35,7 @@ source $ZSH/oh-my-zsh.sh
 
 # Customize to your needs...
 
-setopt interactivecomments
+setopt hist_ignore_all_dups interactivecomments
 unsetopt correctall sharehistory
 
 ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)

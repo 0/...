@@ -17,6 +17,9 @@ ZSH_THEME="wedisagree"
 # Comment this out to disable weekly auto-update checks
 DISABLE_AUTO_UPDATE="true"
 
+# Uncomment to change how many often would you like to wait before auto-updates occur? (in days)
+# export UPDATE_ZSH_DAYS=13
+
 # Uncomment following line if you want to disable colors in ls
 # DISABLE_LS_COLORS="true"
 
@@ -29,7 +32,7 @@ COMPLETION_WAITING_DOTS="true"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(extract git history-substring-search pip zsh-syntax-highlighting)
+plugins=(cp extract git history-substring-search pip zsh-syntax-highlighting)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -57,3 +60,5 @@ alias ls='ls --color=auto --classify --human-readable'
 alias gst='git status --short --branch'
 
 alias pun='phpunit --colors --verbose'
+
+alias ta='tmux attach'

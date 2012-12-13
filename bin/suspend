@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Run pm-suspend as root and with the correct quirks, if any.
+
+QUIRKS=""
+
+
+~/bin/xlock
+
+sudo pm-suspend $QUIRKS

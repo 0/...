@@ -46,7 +46,7 @@ ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 export EDITOR=vim
 export SUDO_PROMPT='%p to sudo as %U: '
 
-export PATH=~/bin:"$PATH"
+export PATH=~/.cabal/bin:~/.gem/ruby/1.9.1/bin:~/bin:"$PATH"
 
 alias :q=exit
 alias :Q=exit

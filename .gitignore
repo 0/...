@@ -1,3 +1,6 @@
+/ghc/*
+!/ghc/ghci.conf
+
 /xmonad/history
 /xmonad/xmonad*
 !/xmonad/xmonad.hs

@@ -48,6 +48,12 @@ export SUDO_PROMPT='%p to sudo as %U: '
 
 export PATH=~/.cabal/bin:~/.gem/ruby/1.9.1/bin:~/bin:"$PATH"
 
+stderred_path='/usr/lib/libstderred.so'
+
+if [[ -f $stderred_path ]]; then
+	export LD_PRELOAD="${stderred_path}${LD_PRELOAD:+:$LD_PRELOAD}"
+fi
+
 alias :q=exit
 alias :Q=exit
 

@@ -1,0 +1,52 @@
+#!/bin/sh
+
+output_name="${1}"
+
+
+# Are we given a valid output name?
+if [ -z "${output_name}" ]; then
+	echo 'I require an output name.'
+
+	exit 1
+fi
+
+xrandr | grep -q -e "^${output_name} \\(dis\\)\\?connected"
+
+# 0 iff exists
+output_exists=$?
+
+if [ ${output_exists} -ne 0 ]; then
+	echo "Output '${output_name}' doesn't exist."
+
+	exit 1
+fi
+
+
+# Is anything plugged in to the output right now?
+xrandr | grep -q -e "^${output_name} disconnected"
+
+# 1 iff connected
+output_connected=$?
+
+if [ ${output_connected} -ne 1 ]; then
+	echo "Nothing plugged in to output '${output_name}'."
+
+	exit 1
+fi
+
+
+# Toggle the state.
+xrandr | grep -q -e "^${output_name} connected ("
+
+# 1 iff on
+output_on=$?
+
+if [ ${output_on} -eq 1 ]; then
+	echo "Disabling output '${output_name}'."
+
+	xrandr --output "${output_name}" --off
+else
+	echo "Enabling output '${output_name}' right of LVDS1."
+
+	xrandr --output "${output_name}" --preferred --right-of LVDS1
+fi

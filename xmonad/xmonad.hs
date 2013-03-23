@@ -67,6 +67,8 @@ mySeparatorFG = myNormalFG
 mySeparatorBG = "#000077"
 myCopyFG      = "#ff0000"
 
+myExternalMonitor = "VGA1"
+
 {------------------------------
 -  Keyboard & mouse bindings  -
 ------------------------------}
@@ -116,6 +118,8 @@ myKeyBindings conf =
     , ("M-S-v m", DynaW.withWorkspace myXPConfig (X.windows . W.shift))
     , ("M-S-v c", DynaW.withWorkspace myXPConfig (X.windows . CopyW.copy))
     , ("M-S-v r", DynaW.renameWorkspace myXPConfig)
+    -- Physical screens.
+    , ("<XF86Display>", X.spawn ("~/bin/toggle-monitor " ++ myExternalMonitor))
     -- Virtual screens.
     , ("M-g 1", Screens.layoutSplitScreen 2 (TwoP.TwoPane 0.5 0.5))
     , ("M-g 2", Screens.layoutSplitScreen 2 (X.Mirror $ TwoP.TwoPane 0.5 0.5))

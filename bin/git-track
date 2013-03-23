@@ -1,8 +1,8 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 # Set up tracking for the current branch.
 
-if [[ -n "$1" ]]; then
+if [ -n "$1" ]; then
 	remote="$1"
 else
 	remote='origin'

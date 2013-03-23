@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Tell xscreensaver to lock the screen.
 

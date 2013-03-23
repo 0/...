@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 # Fast-forward the current branch to the one it's tracking, if possible.
 
@@ -14,7 +14,7 @@ branch="$(
 	'
 )"
 
-if [[ -n "$branch" ]]; then
+if [ -n "$branch" ]; then
 	echo "Fast-forwarding branch ${branch}."
 	git merge --ff-only "$branch"
 else

@@ -1,9 +1,9 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 # Run git-tree from the merge base of HEAD and the provided commit (or master
 # if none provided).
 
-if [[ -n "$1" ]]; then
+if [ -n "$1" ]; then
 	other="$1"
 else
 	other='master'

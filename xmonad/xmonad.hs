@@ -35,6 +35,8 @@ import qualified XMonad.Util.Run as Run
 
 import qualified VLC
 
+import qualified XMonad.Layout.CompactName as Compact
+
 
 main = do
   -- Get the handle of the status bar pipe.
@@ -201,8 +203,7 @@ myDzenPP h copies = DLog.defaultPP
                        ]
     , DLog.ppTitle   = DLog.dzenColor mySpecialFG mySpecialBG . DLog.shorten 75
     , DLog.ppSep     = DLog.pad $ DLog.dzenColor myNormalFG mySeparatorBG "|"
-    -- Don't show the layout.
-    , DLog.ppOrder   = \(ws:l:t:exs) -> [t, ws] ++ exs
+    , DLog.ppOrder   = \(ws:l:t:exs) -> [t, l, ws] ++ exs
     , DLog.ppOutput  = Run.hPutStrLn h
     }
     where
@@ -222,7 +223,8 @@ simpleWorkspaces = [[x] | x <- "`1234567890-="]
 workspaceLeaveWrapper = DynaW.removeEmptyWorkspaceAfterExcept $ X.workspaces myXConfig
 
 -- A single layout with many toggles.
-myLayout = Docks.avoidStruts $
+myLayout = Compact.compactName $
+           Docks.avoidStruts $
            Multi.mkToggle1 MultiI.FULL $
            Multi.mkToggle1 MultiI.MIRROR $
            Multi.mkToggle1 MultiI.NBFULL $

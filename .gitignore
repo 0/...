@@ -4,3 +4,6 @@
 /xmonad/history
 /xmonad/xmonad*
 !/xmonad/xmonad.hs
+
+*.hi
+*.o

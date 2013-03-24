@@ -32,7 +32,6 @@ import qualified XMonad.StackSet as W
 
 import qualified XMonad.Util.Cursor as Cur
 import qualified XMonad.Util.EZConfig as EZ
-import qualified XMonad.Util.Loggers as Log
 import qualified XMonad.Util.Run as Run
 
 
@@ -46,7 +45,7 @@ import qualified XMonad.Layout.CompactName as Compact
 
 main = do
   -- Get the handle of the status bar pipe.
-  dzen <- Run.spawnPipe myStatusBar
+  xmobar <- Run.spawnPipe "xmobar"
   -- NoUrgencyHook is necessary so that XMonad pays attention to urgent
   -- windows.
   X.xmonad $ Urg.withUrgencyHook Urg.NoUrgencyHook
@@ -55,7 +54,7 @@ main = do
                        -- Allow window copies to be highlighted in the status
                        -- bar.
                        copies <- CopyW.wsContainingCopies
-                       DLog.dynamicLogWithPP $ myDzenPP dzen copies
+                       DLog.dynamicLogWithPP $ myLogPP xmobar copies
                  }
            `EZ.additionalKeysP` myKeyBindings
 
@@ -203,27 +202,21 @@ myMouseBindings = fromList
 -  Status bar  -
 ---------------}
 
--- Right-aligned at the top of the screen.
-myStatusBar = "dzen2 -x '0' -y '0' -ta r -fg '" ++ myNormalFG ++ "' -bg '" ++ myNormalBG ++ "' -fn '" ++ myFont ++ "'"
-
-myDzenPP :: Handle -> [X.WorkspaceId] -> DLog.PP
-myDzenPP h copies = DLog.defaultPP
-    { DLog.ppCurrent = DLog.dzenColor myCurrentFG myCurrentBG . DLog.pad
-    , DLog.ppVisible = DLog.dzenColor myVisibleFG myVisibleBG . DLog.pad
+myLogPP :: Handle -> [X.WorkspaceId] -> DLog.PP
+myLogPP h copies = DLog.defaultPP
+    { DLog.ppCurrent = DLog.xmobarColor myCurrentFG myCurrentBG . DLog.pad
+    , DLog.ppVisible = DLog.xmobarColor myVisibleFG myVisibleBG . DLog.pad
     , DLog.ppHidden  = checkCopies myNormalFG myNormalBG
-    , DLog.ppUrgent  = DLog.dzenColor myUrgentFG myUrgentBG . DLog.wrap ">" "<" . DLog.dzenStrip
-    , DLog.ppExtras  = [ Log.dzenColorL mySpecial1FG mySpecial1BG $ Log.date "%d %a %H:%M:%S"
-                       ]
-    , DLog.ppTitle   = DLog.dzenColor mySpecial1FG mySpecial1BG . DLog.shorten 75
-    , DLog.ppLayout  = DLog.dzenColor mySpecial2FG mySpecial2BG
-    , DLog.ppSep     = DLog.pad $ DLog.dzenColor mySeparatorFG mySeparatorBG "|"
-    , DLog.ppOrder   = \(ws:l:t:exs) -> [t, l, ws] ++ exs
+    , DLog.ppUrgent  = DLog.xmobarColor myUrgentFG myUrgentBG . DLog.wrap ">" "<" . DLog.xmobarStrip
+    , DLog.ppTitle   = DLog.xmobarColor mySpecial1FG mySpecial1BG . DLog.shorten 75
+    , DLog.ppLayout  = DLog.xmobarColor mySpecial2FG mySpecial2BG
+    , DLog.ppSep     = DLog.pad $ DLog.xmobarColor mySeparatorFG mySeparatorBG "|"
     , DLog.ppOutput  = Run.hPutStrLn h
     }
     where
       checkCopies usualFG usualBG ws
-          | ws `elem` copies = DLog.dzenColor myCopyFG usualBG ws
-          | otherwise = DLog.dzenColor usualFG usualBG ws
+          | ws `elem` copies = DLog.xmobarColor myCopyFG usualBG ws
+          | otherwise = DLog.xmobarColor usualFG usualBG ws
 
 {-------------------------
 -  Workspaces & layouts  -

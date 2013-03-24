@@ -16,6 +16,7 @@ import qualified XMonad.Actions.Warp as Warp
 
 import qualified XMonad.Hooks.DynamicLog as DLog
 import qualified XMonad.Hooks.ManageDocks as Docks
+import qualified XMonad.Hooks.ToggleHook as THook
 import qualified XMonad.Hooks.UrgencyHook as Urg
 
 import qualified XMonad.Layout.BoringWindows as Boring
@@ -26,6 +27,7 @@ import qualified XMonad.Layout.MultiToggle as Multi
 import qualified XMonad.Layout.MultiToggle.Instances as MultiI
 import qualified XMonad.Layout.Reflect as Refl
 import qualified XMonad.Layout.ResizableTile as Resiz
+import qualified XMonad.Layout.ToggleLayouts as TogL
 import qualified XMonad.Layout.TwoPane as TwoP
 
 import qualified XMonad.Prompt as Prompt
@@ -111,16 +113,18 @@ myKeyBindings =
     , ("M-,", X.sendMessage (X.IncMasterN 1))
     , ("M-.", X.sendMessage (X.IncMasterN (-1)))
     -- Layout toggles.
-    , ("M-C-S-m", X.sendMessage Mag.Toggle)
-    , ("M-C-f", X.sendMessage $ Multi.Toggle MultiI.FULL)
+    , ("M-C-s", X.sendMessage Docks.ToggleStruts)
+    , ("M-C--", X.sendMessage Mag.MagnifyLess)
+    , ("M-C-=", X.sendMessage Mag.MagnifyMore)
+    , ("M-C-z", X.sendMessage Mag.Toggle)
     , ("M-C-m", X.sendMessage $ Multi.Toggle MultiI.MIRROR)
-    , ("M-C-S-f", X.sendMessage $ Multi.Toggle MultiI.NBFULL)
     , ("M-C-b", X.sendMessage $ Multi.Toggle MultiI.NOBORDERS)
     , ("M-C-x", X.sendMessage $ Multi.Toggle Refl.REFLECTX)
     , ("M-C-y", X.sendMessage $ Multi.Toggle Refl.REFLECTY)
+    , ("M-C-f", X.sendMessage TogL.ToggleLayout)
     -- Change workspaces.
     , ("M-a", workspaceLeaveWrapper Urg.focusUrgent)
-    , ("M-S-a", Urg.clearUrgents)
+    , ("M-S-a", Urg.clearUrgents >> THook.runLogHook)
     , ("M-<R>", workspaceLeaveWrapper $ Cycle.moveTo Cycle.Next Cycle.HiddenNonEmptyWS)
     , ("M-<L>", workspaceLeaveWrapper $ Cycle.moveTo Cycle.Prev Cycle.HiddenNonEmptyWS)
     , ("M-s", workspaceLeaveWrapper toggleNonEmptyWS)
@@ -272,21 +276,25 @@ shiftToWorkspace :: X.WorkspaceId -> X.X ()
 shiftToWorkspace w = do DynaW.addHiddenWorkspace w
                         X.windows $ W.shift w
 
--- A single layout with many toggles.
-myLayout = Compact.compactName $
-           Docks.avoidStruts $
-           Multi.mkToggle1 MultiI.FULL $
-           Multi.mkToggle1 MultiI.MIRROR $
-           Multi.mkToggle1 MultiI.NBFULL $
-           Multi.mkToggle1 MultiI.NOBORDERS $
-           Multi.mkToggle1 Refl.REFLECTX $
-           Multi.mkToggle1 Refl.REFLECTY $
-           Mag.magnifierOff $
-           Boring.boringWindows $
-           Min.minimize $
-           -- 1 window in the master pane, taking up half the screen, resizing
-           -- by 3% at a time.
-           Resiz.ResizableTall 1 0.03 0.5 []
+               -- Using a separate full-screen layout instead of
+               -- a MultiToggle toggle so that it's possible to switch
+               -- windows while using BoringWindows.
+myLayout = let full = X.Full
+               -- 1 window in the master pane, taking up half the screen,
+               -- resizing by 3% at a time.
+               tall = Resiz.ResizableTall 1 0.03 0.5 []
+           in Compact.compactName $
+              Docks.avoidStruts $
+              Multi.mkToggle1 MultiI.NOBORDERS $
+              Multi.mkToggle1 Refl.REFLECTX $
+              Multi.mkToggle1 Refl.REFLECTY $
+              -- Mirror must be applied first for X and Y reflections to
+              -- make sense.
+              Multi.mkToggle1 MultiI.MIRROR $
+              Mag.magnifierOff $
+              Boring.boringWindows $
+              Min.minimize $
+              TogL.toggleLayouts full tall
 
 {-----------------------
 -  Customized configs  -

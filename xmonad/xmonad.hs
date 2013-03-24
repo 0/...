@@ -1,3 +1,5 @@
+import Control.Monad (when)
+
 import Data.Map (Map(), fromList)
 
 import System.IO (Handle())
@@ -148,9 +150,22 @@ myKeyBindings =
     -- Fling the cursor.
     , ("M-'", Warp.banishScreen Warp.LowerRight)
     -- Lock and suspend.
-    , ("M-x l", X.spawn "~/bin/xlock")
+    , ("M-x   x", X.spawn "~/bin/xlock")
+    , ("M-x M-x", X.spawn "~/bin/xlock")
     , ("M-x s", X.spawn "~/bin/suspend")
     -- Media, &c. keys.
+    , ("<XF86AudioMute>" , X.spawn "amixer set Master toggle")
+    , ("M-<F6>"          , X.spawn "amixer set Master toggle")
+    , ("S-<XF86AudioMute>" , X.spawn "amixer set Master 0")
+    , ("M-S-<F6>"          , X.spawn "amixer set Master 0")
+    , ("<XF86AudioLowerVolume>" , X.spawn "amixer set Master 1-")
+    , ("M-<F7>"                 , X.spawn "amixer set Master 1-")
+    , ("S-<XF86AudioLowerVolume>" , X.spawn "amixer set Master 10-")
+    , ("M-S-<F7>"                 , X.spawn "amixer set Master 10-")
+    , ("<XF86AudioRaiseVolume>" , X.spawn "amixer set Master 1+")
+    , ("M-<F8>"                 , X.spawn "amixer set Master 1+")
+    , ("S-<XF86AudioRaiseVolume>" , X.spawn "amixer set Master 10+")
+    , ("M-S-<F8>"                 , X.spawn "amixer set Master 10+")
     , ("M-M1-<Space>", X.catchIO $ VLC.pause myVLCSock)
     , ("M-M1-S-<L>", X.catchIO $ VLC.prev myVLCSock)
     , ("M-M1-S-<R>", X.catchIO $ VLC.next myVLCSock)
@@ -158,11 +173,8 @@ myKeyBindings =
     , ("M-M1-<R>", X.catchIO $ VLC.right myVLCSock)
     , ("M-M1-<D>", X.catchIO $ VLC.voldn myVLCSock)
     , ("M-M1-<U>", X.catchIO $ VLC.volup myVLCSock)
-    , ("<XF86MonBrightnessUp>", X.spawn "xbacklight -steps 1 -time 0 +20")
-    , ("<XF86MonBrightnessDown>", X.spawn "xbacklight -steps 1 -time 0 -20")
-    , ("<XF86AudioRaiseVolume>", X.spawn "amixer set Master 10%+")
-    , ("<XF86AudioLowerVolume>", X.spawn "amixer set Master 10%-")
-    , ("<XF86AudioMute>", X.spawn "amixer set Master toggle")
+    , ("<XF86MonBrightnessDown>", X.spawn "xbacklight -steps 1 -time 0 -10")
+    , ("<XF86MonBrightnessUp>", X.spawn "xbacklight -steps 1 -time 0 +10")
     -- Miscellaneous utilities.
     , ("M-n", X.refresh)
     , ("<Print>", X.spawn "import /tmp/screenshot.png")
@@ -175,6 +187,14 @@ myKeyBindings =
         | k <- simpleWorkspaces
         , (f, m) <- [ (workspaceLeaveWrapper . DynaW.addWorkspace, "")
                     , (X.windows . W.shift, "S-")
+                    ]
+    ]
+    ++
+    -- Shortcuts for physical screens.
+    [ ("M-" ++ m ++ k, X.screenWorkspace s >>= flip X.whenJust f)
+        | (k, s) <- zip ["q", "w", "e"] [0..]
+        , (f, m) <- [ (viewWorkspace, "")
+                    , (shiftToWorkspace, "S-")
                     ]
     ]
 
@@ -230,6 +250,25 @@ simpleWorkspaces = [[w] | w <- "`1234567890-="]
 -- Make sure dynamic workspaces exist only when they're supposed to.
 workspaceLeaveWrapper :: X.X () -> X.X ()
 workspaceLeaveWrapper = DynaW.removeEmptyWorkspaceAfterExcept simpleWorkspaces
+
+-- Transform a list of workspaces to a list of their tags.
+workspaceTags :: [W.Workspace X.WorkspaceId l a] -> [X.WorkspaceId]
+workspaceTags = map W.tag
+
+-- Tags for all visible workspaces.
+visibleWorkspaceTags :: X.X [X.WorkspaceId]
+visibleWorkspaceTags = X.withWindowSet $ return . workspaceTags . map W.workspace . W.visible
+
+-- Go to the workspace only if it is currently visible.
+viewWorkspace :: X.WorkspaceId -> X.X ()
+viewWorkspace w = do
+    vs <- visibleWorkspaceTags
+    when (w `elem` vs) . X.windows . W.view $ w
+
+-- Shift the current window to the workspace, creating it first if necessary.
+shiftToWorkspace :: X.WorkspaceId -> X.X ()
+shiftToWorkspace w = do DynaW.addHiddenWorkspace w
+                        X.windows $ W.shift w
 
 -- A single layout with many toggles.
 myLayout = Compact.compactName $

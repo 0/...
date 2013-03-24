@@ -1,6 +1,7 @@
 import Control.Monad (when)
 
 import Data.Map (Map(), fromList)
+import Data.Maybe (isJust, isNothing)
 
 import System.IO (Handle())
 
@@ -48,21 +49,8 @@ import qualified XMonad.Layout.CompactName as Compact
 -- This configuration requires xmonad >=0.11.
 
 
-main = do
-  -- Get the handle of the status bar pipe.
-  xmobar <- Run.spawnPipe "xmobar"
-  -- NoUrgencyHook is necessary so that XMonad pays attention to urgent
-  -- windows.
-  X.xmonad $ Urg.withUrgencyHook Urg.NoUrgencyHook
-           $ myXConfig
-                 { X.logHook = do
-                       -- Allow window copies to be highlighted in the status
-                       -- bar.
-                       copies <- CopyW.wsContainingCopies
-                       WH.workspaceHistoryHook
-                       DLog.dynamicLogWithPP $ myLogPP xmobar copies
-                 }
-           `EZ.additionalKeysP` myKeyBindings
+main = do xmobar <- Run.spawnPipe "xmobar"
+          X.xmonad $ myXConfig xmobar
 
 {----------------
 -  Colors, &c.  -
@@ -131,11 +119,11 @@ myKeyBindings =
     , ("M-C-x", X.sendMessage $ Multi.Toggle Refl.REFLECTX)
     , ("M-C-y", X.sendMessage $ Multi.Toggle Refl.REFLECTY)
     -- Change workspaces.
-    , ("M-a", Urg.focusUrgent)
+    , ("M-a", workspaceLeaveWrapper Urg.focusUrgent)
     , ("M-S-a", Urg.clearUrgents)
-    , ("M-<R>", Cycle.moveTo Cycle.Next Cycle.HiddenNonEmptyWS)
-    , ("M-<L>", Cycle.moveTo Cycle.Prev Cycle.HiddenNonEmptyWS)
-    , ("M-s", Cycle.toggleWS)
+    , ("M-<R>", workspaceLeaveWrapper $ Cycle.moveTo Cycle.Next Cycle.HiddenNonEmptyWS)
+    , ("M-<L>", workspaceLeaveWrapper $ Cycle.moveTo Cycle.Prev Cycle.HiddenNonEmptyWS)
+    , ("M-s", workspaceLeaveWrapper toggleNonEmptyWS)
     , ("M-d", workspaceLeaveWrapper $ Grid.gridselectWorkspace myGSConfig W.greedyView)
     -- Dynamic workspaces.
     , ("M-v", workspaceLeaveWrapper $ DynaW.selectWorkspace myXPConfig)
@@ -189,8 +177,8 @@ myKeyBindings =
     -- Convenient shortcuts for simple workspaces.
     [ ("M-" ++ m ++ k, f k)
         | k <- simpleWorkspaces
-        , (f, m) <- [ (workspaceLeaveWrapper . DynaW.addWorkspace, "")
-                    , (X.windows . W.shift, "S-")
+        , (f, m) <- [ (goToWorkspace, "")
+                    , (shiftToWorkspace, "S-")
                     ]
     ]
     ++
@@ -204,23 +192,21 @@ myKeyBindings =
 
 myMouseBindings :: Map (X.KeyMask, X.Button) (X.Window -> X.X ())
 myMouseBindings = fromList
-    -- Set the window to floating mode and move by dragging.
-    [ ((myModMask, X.button1), \w -> X.focus w >>
-                                X.mouseMoveWindow w >>
-                                Snap.snapMagicMove snapTolerance snapTolerance w >>
-                                X.windows W.shiftMaster)
-    -- Set the window to floating mode and resize by dragging.
-    , ((myModMask, X.button3), \w -> X.focus w >>
-                                X.mouseResizeWindow w >>
-                                Snap.snapMagicResize [Snap.R, Snap.D] snapTolerance snapTolerance w >>
-                                X.windows W.shiftMaster)
+    -- Set the window to floating mode and move/resize by dragging.
+    [ ((myModMask, X.button1), windowAction X.mouseMoveWindow Snap.snapMagicMove)
+    , ((myModMask, X.button3), windowAction X.mouseResizeWindow $ Snap.snapMagicResize [Snap.R, Snap.D])
     -- Resize the master and slave areas by scrolling.
-    , ((myModMask, X.button4), \w -> X.sendMessage X.Expand)
-    , ((myModMask, X.button5), \w -> X.sendMessage X.Shrink)
-    , ((myModMask .|. X.shiftMask, X.button4), \w -> X.sendMessage Resiz.MirrorExpand)
-    , ((myModMask .|. X.shiftMask, X.button5), \w -> X.sendMessage Resiz.MirrorShrink)
+    , ((myModMask, X.button4), const $ X.sendMessage X.Expand)
+    , ((myModMask, X.button5), const $ X.sendMessage X.Shrink)
+    , ((myModMask .|. X.shiftMask, X.button4), const $ X.sendMessage Resiz.MirrorExpand)
+    , ((myModMask .|. X.shiftMask, X.button5), const $ X.sendMessage Resiz.MirrorShrink)
     ]
     where snapTolerance = Just 50
+          windowAction action1 action2 w = do
+              X.focus w
+              action1 w
+              action2 snapTolerance snapTolerance w
+              X.windows W.shiftMaster
 
 {---------------
 -  Status bar  -
@@ -263,6 +249,18 @@ workspaceTags = map W.tag
 visibleWorkspaceTags :: X.X [X.WorkspaceId]
 visibleWorkspaceTags = X.withWindowSet $ return . workspaceTags . map W.workspace . W.visible
 
+-- Get all the empty workspaces in any order.
+allEmptyWorkspaces :: W.StackSet X.WorkspaceId l a s sd -> [X.WorkspaceId]
+allEmptyWorkspaces = workspaceTags . filter (isNothing . W.stack) . W.workspaces
+
+-- Go back to the last visited workspace that currently has any windows.
+toggleNonEmptyWS :: X.X ()
+toggleNonEmptyWS = X.withWindowSet $ Cycle.toggleWS' . allEmptyWorkspaces
+
+-- Go directly to the desired workspace. Do not pass Go, do not collect $200.
+goToWorkspace :: X.WorkspaceId -> X.X ()
+goToWorkspace = workspaceLeaveWrapper . DynaW.addWorkspace
+
 -- Go to the workspace only if it is currently visible.
 viewWorkspace :: X.WorkspaceId -> X.X ()
 viewWorkspace w = do
@@ -303,24 +301,40 @@ myXPConfig = Prompt.defaultXPConfig
     , Prompt.historySize = 0
     }
 
-myXConfig = X.defaultConfig
-    { X.terminal           = myTerminal
-    , X.modMask            = myModMask
-    , X.normalBorderColor  = "#000099"
-    , X.focusedBorderColor = "#990000"
-    -- Disable the default bindings.
-    , X.keys               = const $ fromList []
-    , X.workspaces         = simpleWorkspaces
-    , X.mouseBindings      = const myMouseBindings
-    , X.manageHook         = X.composeAll
-                                 [ X.className =? "Xmessage" --> X.doFloat
-                                 , Docks.manageDocks
-                                 ]
-    , X.layoutHook         = myLayout
-    , X.startupHook        = return () >>
-                             EZ.checkKeymap myXConfig myKeyBindings >>
-                             Cur.setDefaultCursor Cur.xC_crosshair
-    }
+myXConfig h =
+    let uHook = Urg.BorderUrgencyHook
+                  { Urg.urgencyBorderColor = myUrgentBG
+                  }
+        uConf = Urg.urgencyConfig
+                  { Urg.suppressWhen = Urg.OnScreen
+                  }
+        man   = X.composeAll
+                  [ X.className =? "Xmessage" --> X.doFloat
+                  , Docks.manageDocks
+                  ]
+        conf  = X.defaultConfig
+                  { X.terminal           = myTerminal
+                  , X.modMask            = myModMask
+                  , X.normalBorderColor  = "#000099"
+                  , X.focusedBorderColor = "#990000"
+                  -- Disable the default bindings.
+                  , X.keys               = const $ fromList []
+                  , X.workspaces         = simpleWorkspaces
+                  , X.mouseBindings      = const myMouseBindings
+                  , X.manageHook         = man
+                  , X.layoutHook         = myLayout
+                  }
+    in Urg.withUrgencyHookC uHook uConf $
+       flip EZ.additionalKeysP myKeyBindings $
+       conf
+         { X.startupHook = do EZ.checkKeymap conf myKeyBindings
+                              Cur.setDefaultCursor Cur.xC_crosshair
+                              -- Allow window copies to be highlighted in
+                              -- the status bar.
+         , X.logHook     = do copies <- CopyW.wsContainingCopies
+                              WH.workspaceHistoryHook
+                              DLog.dynamicLogWithPP $ myLogPP h copies
+         }
 
 myGSConfig :: Grid.GSConfig X.WorkspaceId
 myGSConfig = Grid.defaultGSConfig

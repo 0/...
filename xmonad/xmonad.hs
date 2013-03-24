@@ -8,7 +8,6 @@ import XMonad ((-->), (.|.), (=?))
 import qualified XMonad as X
 
 import qualified XMonad.Actions.CopyWindow as CopyW
-import qualified XMonad.Actions.CycleWS as Cycle
 import qualified XMonad.Actions.DynamicWorkspaces as DynaW
 import qualified XMonad.Actions.FloatSnap as Snap
 import qualified XMonad.Actions.GridSelect as Grid
@@ -39,6 +38,10 @@ import qualified XMonad.Util.Run as Run
 
 import qualified VLC
 
+import qualified XMonad.Actions.CycleWS as Cycle
+
+import qualified XMonad.Hooks.WorkspaceHistory as WH
+
 import qualified XMonad.Layout.CompactName as Compact
 
 
@@ -56,6 +59,7 @@ main = do
                        -- Allow window copies to be highlighted in the status
                        -- bar.
                        copies <- CopyW.wsContainingCopies
+                       WH.workspaceHistoryHook
                        DLog.dynamicLogWithPP $ myLogPP xmobar copies
                  }
            `EZ.additionalKeysP` myKeyBindings

@@ -32,6 +32,10 @@ import qualified XMonad.Util.EZConfig as EZ
 import qualified XMonad.Util.Loggers as Log
 import qualified XMonad.Util.Run as Run
 
+
+import qualified VLC
+
+
 main = do
   -- Get the handle of the status bar pipe.
   dzen <- Run.spawnPipe myStatusBar
@@ -68,6 +72,7 @@ mySeparatorBG = "#000077"
 myCopyFG      = "#ff0000"
 
 myExternalMonitor = "VGA1"
+myVLCSock         = "/tmp/vlc.sock"
 
 {------------------------------
 -  Keyboard & mouse bindings  -
@@ -133,6 +138,13 @@ myKeyBindings conf =
     , ("M-x l", X.spawn "~/bin/xlock")
     , ("M-x s", X.spawn "~/bin/suspend")
     -- Media, &c. keys.
+    , ("M-M1-<Space>", X.catchIO $ VLC.pause myVLCSock)
+    , ("M-M1-S-<L>", X.catchIO $ VLC.prev myVLCSock)
+    , ("M-M1-S-<R>", X.catchIO $ VLC.next myVLCSock)
+    , ("M-M1-<L>", X.catchIO $ VLC.left myVLCSock)
+    , ("M-M1-<R>", X.catchIO $ VLC.right myVLCSock)
+    , ("M-M1-<D>", X.catchIO $ VLC.voldn myVLCSock)
+    , ("M-M1-<U>", X.catchIO $ VLC.volup myVLCSock)
     , ("<XF86MonBrightnessUp>", X.spawn "xbacklight -steps 1 -time 0 +20")
     , ("<XF86MonBrightnessDown>", X.spawn "xbacklight -steps 1 -time 0 -20")
     , ("<XF86AudioRaiseVolume>", X.spawn "amixer set Master 10%+")

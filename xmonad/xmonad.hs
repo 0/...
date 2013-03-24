@@ -1,4 +1,4 @@
-import Control.Monad (when)
+import Control.Monad ((>=>), join, when)
 
 import Data.Map (Map(), fromList)
 import Data.Maybe (isJust, isNothing)
@@ -11,7 +11,6 @@ import qualified XMonad as X
 import qualified XMonad.Actions.CopyWindow as CopyW
 import qualified XMonad.Actions.DynamicWorkspaces as DynaW
 import qualified XMonad.Actions.FloatSnap as Snap
-import qualified XMonad.Actions.GridSelect as Grid
 import qualified XMonad.Actions.Warp as Warp
 
 import qualified XMonad.Hooks.DynamicLog as DLog
@@ -30,8 +29,6 @@ import qualified XMonad.Layout.ResizableTile as Resiz
 import qualified XMonad.Layout.ToggleLayouts as TogL
 import qualified XMonad.Layout.TwoPane as TwoP
 
-import qualified XMonad.Prompt as Prompt
-
 import qualified XMonad.StackSet as W
 
 import qualified XMonad.Util.Cursor as Cur
@@ -42,6 +39,7 @@ import qualified XMonad.Util.Run as Run
 import qualified VLC
 
 import qualified XMonad.Actions.CycleWS as Cycle
+import qualified XMonad.Actions.GridSelect as Grid
 
 import qualified XMonad.Hooks.WorkspaceHistory as WH
 
@@ -128,12 +126,11 @@ myKeyBindings =
     , ("M-<R>", workspaceLeaveWrapper $ Cycle.moveTo Cycle.Next Cycle.HiddenNonEmptyWS)
     , ("M-<L>", workspaceLeaveWrapper $ Cycle.moveTo Cycle.Prev Cycle.HiddenNonEmptyWS)
     , ("M-s", workspaceLeaveWrapper toggleNonEmptyWS)
-    , ("M-d", workspaceLeaveWrapper $ Grid.gridselectWorkspace myGSConfig W.greedyView)
+    , ("M-d", actOnNonEmptyWorkspace goToWorkspace)
     -- Dynamic workspaces.
-    , ("M-v", workspaceLeaveWrapper $ DynaW.selectWorkspace myXPConfig)
-    , ("M-S-v m", DynaW.withWorkspace myXPConfig (X.windows . W.shift))
-    , ("M-S-v c", DynaW.withWorkspace myXPConfig (X.windows . CopyW.copy))
-    , ("M-S-v r", DynaW.renameWorkspace myXPConfig)
+    , ("M-S-d m", actOnNonEmptyWorkspace shiftToWorkspace)
+    , ("M-S-d c", actOnNonEmptyWorkspace copyToWorkspace)
+    , ("M-S-d r", actOnNonEmptyWorkspace renameWorkspace)
     -- Physical screens.
     , ("<XF86Display>", X.spawn ("~/bin/toggle-monitor " ++ myExternalMonitor))
     -- Virtual screens.
@@ -257,9 +254,29 @@ visibleWorkspaceTags = X.withWindowSet $ return . workspaceTags . map W.workspac
 allEmptyWorkspaces :: W.StackSet X.WorkspaceId l a s sd -> [X.WorkspaceId]
 allEmptyWorkspaces = workspaceTags . filter (isNothing . W.stack) . W.workspaces
 
+-- Get all the non-empty workspaces in a "useful" order.
+allNonEmptyWorkspaces :: W.StackSet X.WorkspaceId l a s sd -> [X.WorkspaceId]
+allNonEmptyWorkspaces = workspaceTags . filter (isJust . W.stack) . allWorkspaces
+    where allWorkspaces ws = concatMap ($ ws) [ W.hidden
+                                              , (:[]) . W.workspace . W.current
+                                              , map W.workspace . W.visible
+                                              ]
+
 -- Go back to the last visited workspace that currently has any windows.
 toggleNonEmptyWS :: X.X ()
 toggleNonEmptyWS = X.withWindowSet $ Cycle.toggleWS' . allEmptyWorkspaces
+
+-- This name is a bit misleading, as the suggestions given are all the
+-- non-empty workspaces, but it's possible to act on any arbitrary
+-- workspace by typing in its name.
+actOnNonEmptyWorkspace :: (X.WorkspaceId -> X.X ()) -> X.X ()
+actOnNonEmptyWorkspace action = X.withWindowSet $ selectStringAndAct action . allNonEmptyWorkspaces
+
+-- Use GridSelect to choose a string and do something with the result.
+selectStringAndAct :: (String -> X.X ()) -> [String] -> X.X ()
+selectStringAndAct action = Grid.gridselect myGSConfig . join zip
+                              >=> flip X.whenJust action
+
 
 -- Go directly to the desired workspace. Do not pass Go, do not collect $200.
 goToWorkspace :: X.WorkspaceId -> X.X ()
@@ -275,6 +292,19 @@ viewWorkspace w = do
 shiftToWorkspace :: X.WorkspaceId -> X.X ()
 shiftToWorkspace w = do DynaW.addHiddenWorkspace w
                         X.windows $ W.shift w
+
+-- Copy the current window to the workspace, creating it first if necessary.
+copyToWorkspace :: X.WorkspaceId -> X.X ()
+copyToWorkspace w = do DynaW.addHiddenWorkspace w
+                       X.windows $ CopyW.copy w
+
+-- Rename the workspace and do some bookkeeping.
+renameWorkspace :: X.WorkspaceId -> X.X ()
+renameWorkspace w = X.withWindowSet $ \ws -> do
+    let c = W.tag . W.workspace . W.current $ ws
+    DynaW.renameWorkspaceByName w
+    -- Make sure that we're not left without one of the simple workspaces.
+    when (c `elem` simpleWorkspaces) $ DynaW.addHiddenWorkspace c
 
                -- Using a separate full-screen layout instead of
                -- a MultiToggle toggle so that it's possible to switch
@@ -299,15 +329,6 @@ myLayout = let full = X.Full
 {-----------------------
 -  Customized configs  -
 -----------------------}
-
-myXPConfig :: Prompt.XPConfig
-myXPConfig = Prompt.defaultXPConfig
-    { Prompt.fgColor     = myNormalFG
-    , Prompt.bgColor     = myNormalBG
-    , Prompt.font        = myFont'
-    -- Don't bother keeping track.
-    , Prompt.historySize = 0
-    }
 
 myXConfig h =
     let uHook = Urg.BorderUrgencyHook
@@ -346,6 +367,7 @@ myXConfig h =
 
 myGSConfig :: Grid.GSConfig X.WorkspaceId
 myGSConfig = Grid.defaultGSConfig
-    { Grid.gs_font     = myFont'
-    , Grid.gs_navigate = Grid.navNSearch
+    { Grid.gs_font       = myFont'
+    , Grid.gs_navigate   = Grid.navNSearch
+    , Grid.gs_rearranger = Grid.searchStringRearrangerGenerator id
     }

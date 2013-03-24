@@ -1,5 +1,8 @@
-import qualified Data.Map as M
+import Data.Map (Map(), fromList)
 
+import System.IO (Handle())
+
+import XMonad ((-->), (.|.), (=?))
 import qualified XMonad as X
 
 import qualified XMonad.Actions.CopyWindow as CopyW
@@ -38,6 +41,9 @@ import qualified VLC
 import qualified XMonad.Layout.CompactName as Compact
 
 
+-- This configuration requires xmonad >=0.11.
+
+
 main = do
   -- Get the handle of the status bar pipe.
   dzen <- Run.spawnPipe myStatusBar
@@ -51,28 +57,33 @@ main = do
                        copies <- CopyW.wsContainingCopies
                        DLog.dynamicLogWithPP $ myDzenPP dzen copies
                  }
-           `EZ.additionalKeysP` (myKeyBindings myXConfig)
+           `EZ.additionalKeysP` myKeyBindings
 
 {----------------
 -  Colors, &c.  -
 ----------------}
 
-myFont = "-*-fixed-medium-r-*-*-12-*-*-*-*-*-*-*"
-
 myNormalFG    = "#ffffff"
 myNormalBG    = "#000000"
-myFocusedFG   = "#000000"
-myFocusedBG   = "#cccccc"
-mySpecialFG   = "#aaffaa"
-mySpecialBG   = myNormalBG
-myAltFG       = myNormalFG
-myAltBG       = "#777777"
-myUrgentFG    = "#ffffff"
+myCurrentFG   = myNormalFG
+myCurrentBG   = "#888888"
+myVisibleFG   = myNormalFG
+myVisibleBG   = "#444444"
+myUrgentFG    = myNormalFG
 myUrgentBG    = "#ff6600"
-mySeparatorFG = myNormalFG
-mySeparatorBG = "#000077"
+mySpecial1FG  = "#aaffaa"
+mySpecial1BG  = myNormalBG
+mySpecial2FG  = "#ffaaff"
+mySpecial2BG  = myNormalBG
+mySeparatorFG = "#000066"
+mySeparatorBG = "#000033"
 myCopyFG      = "#ff0000"
 
+myFont  = "DejaVu Sans Mono-8"
+myFont' = "xft:" ++ myFont
+
+myTerminal        = "urxvt"
+myModMask         = X.mod4Mask
 myExternalMonitor = "VGA1"
 myVLCSock         = "/tmp/vlc.sock"
 
@@ -80,8 +91,9 @@ myVLCSock         = "/tmp/vlc.sock"
 -  Keyboard & mouse bindings  -
 ------------------------------}
 
-myKeyBindings conf =
-    [ ("M-z", X.spawn $ X.terminal conf)
+myKeyBindings :: [(String, X.X ())]
+myKeyBindings =
+    [ ("M-z", X.spawn myTerminal)
     -- Close only focused instance of focused window.
     , ("M-S-c", CopyW.kill1)
     -- Close all other instances of focused window.
@@ -106,7 +118,7 @@ myKeyBindings conf =
     , ("M-,", X.sendMessage (X.IncMasterN 1))
     , ("M-.", X.sendMessage (X.IncMasterN (-1)))
     -- Layout toggles.
-    , ("M-C-S-m", X.sendMessage $ Mag.Toggle)
+    , ("M-C-S-m", X.sendMessage Mag.Toggle)
     , ("M-C-f", X.sendMessage $ Multi.Toggle MultiI.FULL)
     , ("M-C-m", X.sendMessage $ Multi.Toggle MultiI.MIRROR)
     , ("M-C-S-f", X.sendMessage $ Multi.Toggle MultiI.NBFULL)
@@ -167,25 +179,25 @@ myKeyBindings conf =
                     ]
     ]
 
-snapTolerance = Just 50
-
-myMouseBindings (X.XConfig {X.modMask = modm}) = M.fromList $
+myMouseBindings :: Map (X.KeyMask, X.Button) (X.Window -> X.X ())
+myMouseBindings = fromList
     -- Set the window to floating mode and move by dragging.
-    [ ((modm, X.button1), \w -> X.focus w >>
+    [ ((myModMask, X.button1), \w -> X.focus w >>
                                 X.mouseMoveWindow w >>
                                 Snap.snapMagicMove snapTolerance snapTolerance w >>
                                 X.windows W.shiftMaster)
     -- Set the window to floating mode and resize by dragging.
-    , ((modm, X.button3), \w -> X.focus w >>
+    , ((myModMask, X.button3), \w -> X.focus w >>
                                 X.mouseResizeWindow w >>
                                 Snap.snapMagicResize [Snap.R, Snap.D] snapTolerance snapTolerance w >>
                                 X.windows W.shiftMaster)
     -- Resize the master and slave areas by scrolling.
-    , ((modm, X.button4), \w -> X.sendMessage X.Expand)
-    , ((modm, X.button5), \w -> X.sendMessage X.Shrink)
-    , ((modm X..|. X.shiftMask, X.button4), \w -> X.sendMessage Resiz.MirrorExpand)
-    , ((modm X..|. X.shiftMask, X.button5), \w -> X.sendMessage Resiz.MirrorShrink)
+    , ((myModMask, X.button4), \w -> X.sendMessage X.Expand)
+    , ((myModMask, X.button5), \w -> X.sendMessage X.Shrink)
+    , ((myModMask .|. X.shiftMask, X.button4), \w -> X.sendMessage Resiz.MirrorExpand)
+    , ((myModMask .|. X.shiftMask, X.button5), \w -> X.sendMessage Resiz.MirrorShrink)
     ]
+    where snapTolerance = Just 50
 
 {---------------
 -  Status bar  -
@@ -194,15 +206,17 @@ myMouseBindings (X.XConfig {X.modMask = modm}) = M.fromList $
 -- Right-aligned at the top of the screen.
 myStatusBar = "dzen2 -x '0' -y '0' -ta r -fg '" ++ myNormalFG ++ "' -bg '" ++ myNormalBG ++ "' -fn '" ++ myFont ++ "'"
 
+myDzenPP :: Handle -> [X.WorkspaceId] -> DLog.PP
 myDzenPP h copies = DLog.defaultPP
-    { DLog.ppCurrent = DLog.dzenColor myFocusedFG myFocusedBG . DLog.pad
-    , DLog.ppVisible = DLog.dzenColor myAltFG myAltBG . DLog.pad
+    { DLog.ppCurrent = DLog.dzenColor myCurrentFG myCurrentBG . DLog.pad
+    , DLog.ppVisible = DLog.dzenColor myVisibleFG myVisibleBG . DLog.pad
     , DLog.ppHidden  = checkCopies myNormalFG myNormalBG
     , DLog.ppUrgent  = DLog.dzenColor myUrgentFG myUrgentBG . DLog.wrap ">" "<" . DLog.dzenStrip
-    , DLog.ppExtras  = [ Log.dzenColorL mySpecialFG mySpecialBG $ Log.date "%d %a %H:%M:%S"
+    , DLog.ppExtras  = [ Log.dzenColorL mySpecial1FG mySpecial1BG $ Log.date "%d %a %H:%M:%S"
                        ]
-    , DLog.ppTitle   = DLog.dzenColor mySpecialFG mySpecialBG . DLog.shorten 75
-    , DLog.ppSep     = DLog.pad $ DLog.dzenColor myNormalFG mySeparatorBG "|"
+    , DLog.ppTitle   = DLog.dzenColor mySpecial1FG mySpecial1BG . DLog.shorten 75
+    , DLog.ppLayout  = DLog.dzenColor mySpecial2FG mySpecial2BG
+    , DLog.ppSep     = DLog.pad $ DLog.dzenColor mySeparatorFG mySeparatorBG "|"
     , DLog.ppOrder   = \(ws:l:t:exs) -> [t, l, ws] ++ exs
     , DLog.ppOutput  = Run.hPutStrLn h
     }
@@ -217,10 +231,12 @@ myDzenPP h copies = DLog.defaultPP
 
 -- Workspaces with single-character names that can be keyed in with no
 -- modifiers.
-simpleWorkspaces = [[x] | x <- "`1234567890-="]
+simpleWorkspaces :: [X.WorkspaceId]
+simpleWorkspaces = [[w] | w <- "`1234567890-="]
 
--- Make sure workspaces exist only when they're supposed to.
-workspaceLeaveWrapper = DynaW.removeEmptyWorkspaceAfterExcept $ X.workspaces myXConfig
+-- Make sure dynamic workspaces exist only when they're supposed to.
+workspaceLeaveWrapper :: X.X () -> X.X ()
+workspaceLeaveWrapper = DynaW.removeEmptyWorkspaceAfterExcept simpleWorkspaces
 
 -- A single layout with many toggles.
 myLayout = Compact.compactName $
@@ -242,33 +258,36 @@ myLayout = Compact.compactName $
 -  Customized configs  -
 -----------------------}
 
+myXPConfig :: Prompt.XPConfig
 myXPConfig = Prompt.defaultXPConfig
     { Prompt.fgColor     = myNormalFG
     , Prompt.bgColor     = myNormalBG
-    , Prompt.font        = myFont
+    , Prompt.font        = myFont'
     -- Don't bother keeping track.
     , Prompt.historySize = 0
     }
 
 myXConfig = X.defaultConfig
-    { X.terminal           = "urxvt"
-    , X.modMask            = X.mod4Mask
+    { X.terminal           = myTerminal
+    , X.modMask            = myModMask
     , X.normalBorderColor  = "#000099"
     , X.focusedBorderColor = "#990000"
     -- Disable the default bindings.
-    , X.keys               = const $ M.fromList []
+    , X.keys               = const $ fromList []
     , X.workspaces         = simpleWorkspaces
-    , X.mouseBindings      = myMouseBindings
+    , X.mouseBindings      = const myMouseBindings
     , X.manageHook         = X.composeAll
-                                 [ X.className X.=? "Xmessage" X.--> X.doFloat
+                                 [ X.className =? "Xmessage" --> X.doFloat
                                  , Docks.manageDocks
                                  ]
     , X.layoutHook         = myLayout
     , X.startupHook        = return () >>
-                             EZ.checkKeymap myXConfig (myKeyBindings myXConfig) >>
+                             EZ.checkKeymap myXConfig myKeyBindings >>
                              Cur.setDefaultCursor Cur.xC_crosshair
     }
 
+myGSConfig :: Grid.GSConfig X.WorkspaceId
 myGSConfig = Grid.defaultGSConfig
-    { Grid.gs_navigate = Grid.navNSearch
+    { Grid.gs_font     = myFont'
+    , Grid.gs_navigate = Grid.navNSearch
     }

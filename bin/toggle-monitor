@@ -28,25 +28,28 @@ xrandr | grep -q -e "^${output_name} disconnected"
 # 1 iff connected
 output_connected=$?
 
-if [ ${output_connected} -ne 1 ]; then
-	echo "Nothing plugged in to output '${output_name}'."
+# Is the display on?
+xrandr | grep -q -e "^${output_name} \\(dis\\)\\?connected [0-9]"
 
-	exit 1
-fi
+# 0 iff on
+output_on=$?
 
 
 # Toggle the state.
-xrandr | grep -q -e "^${output_name} connected ("
-
-# 1 iff on
-output_on=$?
-
-if [ ${output_on} -eq 1 ]; then
-	echo "Disabling output '${output_name}'."
-
-	xrandr --output "${output_name}" --off
-else
+if [ ${output_connected} -eq 1 ] && [ ${output_on} -eq 1 ]; then
 	echo "Enabling output '${output_name}' right of LVDS1."
 
 	xrandr --output "${output_name}" --preferred --right-of LVDS1
+
+	exit 0
+elif [ ${output_on} -eq 0 ]; then
+	echo "Disabling output '${output_name}'."
+
+	xrandr --output "${output_name}" --off
+
+	exit 0
+else
+	echo "Nothing plugged in to output '${output_name}'."
+
+	exit 1
 fi

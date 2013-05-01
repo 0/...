@@ -3,6 +3,7 @@
 	br = branch
 	co = checkout
 	df = diff
+	first = commit --allow-empty -m 'Initial empty commit'
 	pop = stash pop --index
 	review = log -p -M --ignore-all-space --reverse
 	st = status

@@ -1,0 +1,15 @@
+startup_message off
+vbell off
+
+hardstatus on
+hardstatus alwayslastline
+hardstatus string '%{gk}[%{G}%H%{g}][%= %{wk}%?%-Lw%?%{=b kG}(%{W}%n*%f %t%?(%u)%?%{=b kG})%{= kw}%?%+Lw%?%?%= %{g}][%{G}%m/%d %c:%s%{g}]%{W}'
+
+bell_msg 'Bell in window %^G'
+
+term screen-256color
+
+altscreen on
+deflogin off
+
+nethack on

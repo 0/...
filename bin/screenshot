@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# Requires ImageMagick and xdotool.
+
+DIR=~/tmp/screenshots/
+LATEST=~/tmp/screenshot.png
+
+# yyyy-mm-dd_hh:mm:ss.nnnnnnnnn
+#
+# Nanoseconds are to prevent collisions in the unlikely event of rapid-fire
+# screenshot taking.
+dest="${DIR}$(date '+%F_%T.%N').png"
+
+mkdir -p "$DIR"
+
+case "$1" in
+	root)
+		# Everything.
+		import -window root "$dest"
+		;;
+	window)
+		# Current window.
+		import -window "$(xdotool getwindowfocus -f)" "$dest"
+		;;
+	*)
+		# User selection.
+		import "$dest"
+		;;
+esac
+
+ln -sf "$dest" "$LATEST"

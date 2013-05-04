@@ -168,9 +168,12 @@ myKeyBindings =
   , ("M-M1-<U>", X.catchIO $ VLC.volup myVLCSock)
   , ("<XF86MonBrightnessDown>", X.spawn "xbacklight -steps 1 -time 0 -10")
   , ("<XF86MonBrightnessUp>", X.spawn "xbacklight -steps 1 -time 0 +10")
+  -- Screenshots.
+  , ("<Print>", X.spawn "~/bin/screenshot")
+  , ("S-<Print>", X.spawn "~/bin/screenshot window")
+  , ("M1-<Print>", X.spawn "~/bin/screenshot root")
   -- Miscellaneous utilities.
   , ("M-n", X.refresh)
-  , ("<Print>", X.spawn "import /tmp/screenshot.png")
   , ("M1-<Space>", X.spawn "urxvt -e alsamixer")
   , ("M-x q", X.spawn "xmonad --recompile && xmonad --restart")
   ]

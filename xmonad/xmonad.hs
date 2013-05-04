@@ -1,4 +1,4 @@
-import Control.Monad ((>=>), join, when)
+import Control.Monad ((>=>), join, liftM, when)
 
 import Data.Map (Map(), fromList)
 import Data.Maybe (isJust, isNothing)
@@ -271,10 +271,16 @@ toggleNonEmptyWS = X.withWindowSet $ Cycle.toggleWS' . allEmptyWorkspaces
 actOnNonEmptyWorkspace :: (X.WorkspaceId -> X.X ()) -> X.X ()
 actOnNonEmptyWorkspace action = X.withWindowSet $ selectStringAndAct action . allNonEmptyWorkspaces
 
+-- Use GridSelect, but handle empty cases specially.
+gridSelectNonEmpty :: [String] -> X.X (Maybe String)
+gridSelectNonEmpty [] = gridSelectNonEmpty [""]
+gridSelectNonEmpty xs = liftM process $ Grid.gridselect myGSConfig $ join zip xs
+  where process (Just "") = process Nothing
+        process x         = x
+
 -- Use GridSelect to choose a string and do something with the result.
 selectStringAndAct :: (String -> X.X ()) -> [String] -> X.X ()
-selectStringAndAct action = Grid.gridselect myGSConfig . join zip
-                              >=> flip X.whenJust action
+selectStringAndAct action = gridSelectNonEmpty >=> flip X.whenJust action
 
 -- Go directly to the desired workspace. Do not pass Go, do not collect $200.
 goToWorkspace :: X.WorkspaceId -> X.X ()

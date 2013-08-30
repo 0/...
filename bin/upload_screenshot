@@ -1,0 +1,13 @@
+#!/bin/sh
+
+url=$(imgur ~/tmp/screenshot.png)
+
+case "$url" in
+	http*)
+		xdg-open "$url"
+		;;
+	*)
+		echo "Something went wrong. Here's what I got: ${url}"
+		exit 1
+		;;
+esac

@@ -1,6 +1,9 @@
 startup_message off
 vbell off
 
+# Pretend we're in tmux.
+escape ^B^B
+
 hardstatus on
 hardstatus alwayslastline
 hardstatus string '%{gk}[%{G}%H%{g}][%= %{wk}%?%-Lw%?%{=b kG}(%{W}%n*%f %t%?(%u)%?%{=b kG})%{= kw}%?%+Lw%?%?%= %{g}][%{G}%m/%d %c:%s%{g}]%{W}'

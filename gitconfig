@@ -8,7 +8,7 @@
 	review = log -p -M --ignore-all-space --reverse
 	st = status
 	subup = submodule update --init --recursive
-	tree = log --graph --oneline --decorate
+	tree = log --graph --oneline --decorate --pretty=format:'%C(auto)%h %s%d %C(bold blue)(%cr)%Creset %Cgreen%an%Creset'
 [color]
 	ui = auto
 [core]

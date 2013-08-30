@@ -170,9 +170,9 @@ myKeyBindings =
   , ("<XF86MonBrightnessUp>", X.spawn "xbacklight -steps 1 -time 0 +10")
   -- Screenshots.
   , ("<Print>", X.spawn "~/bin/screenshot")
-  , ("S-<Print>", X.spawn "~/bin/screenshot window")
-  , ("M1-<Print>", X.spawn "~/bin/screenshot root")
-  , ("M-<Print> u", X.spawn "~/bin/upload_screenshot")
+  , ("S-<Print> w", X.spawn "~/bin/screenshot window")
+  , ("S-<Print> r", X.spawn "~/bin/screenshot root")
+  , ("S-<Print> u", X.spawn "~/bin/upload_screenshot")
   -- Miscellaneous utilities.
   , ("M-n", X.refresh)
   , ("M1-<Space>", X.spawn "urxvt -e alsamixer")

@@ -54,6 +54,16 @@ if [[ -f $stderred_path ]]; then
 	export LD_PRELOAD="${stderred_path}${LD_PRELOAD:+:$LD_PRELOAD}"
 fi
 
+# Toggle the right prompt. Necessary with large repositories and slow drives.
+rptoggle() {
+	if [[ -n "$RPROMPT" ]]; then
+		R="$RPROMPT"
+		RPROMPT=""
+	else
+		RPROMPT="$R"
+	fi
+}
+
 alias :q=exit
 alias :Q=exit
 

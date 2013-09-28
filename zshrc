@@ -14,10 +14,10 @@ ZSH_THEME="wedisagree"
 # Set to this to use case-sensitive completion
 # CASE_SENSITIVE="true"
 
-# Comment this out to disable weekly auto-update checks
+# Uncomment this to disable bi-weekly auto-update checks
 DISABLE_AUTO_UPDATE="true"
 
-# Uncomment to change how many often would you like to wait before auto-updates occur? (in days)
+# Uncomment to change how often before auto-updates occur? (in days)
 # export UPDATE_ZSH_DAYS=13
 
 # Uncomment following line if you want to disable colors in ls
@@ -26,20 +26,28 @@ DISABLE_AUTO_UPDATE="true"
 # Uncomment following line if you want to disable autosetting terminal title.
 # DISABLE_AUTO_TITLE="true"
 
+# Uncomment following line if you want to disable command autocorrection
+DISABLE_CORRECTION="true"
+
 # Uncomment following line if you want red dots to be displayed while waiting for completion
 COMPLETION_WAITING_DOTS="true"
+
+# Uncomment following line if you want to disable marking untracked files under
+# VCS as dirty. This makes repository status check for large repositories much,
+# much faster.
+# DISABLE_UNTRACKED_FILES_DIRTY="true"
 
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(cp extract git history-substring-search pip zsh-syntax-highlighting)
+plugins=(brew colored-man cp extract git history-substring-search pip virtualenv zsh-syntax-highlighting)
 
 source $ZSH/oh-my-zsh.sh
 
 # Customize to your needs...
 
 setopt hist_ignore_all_dups interactivecomments
-unsetopt correctall sharehistory
+unsetopt sharehistory
 
 ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 
@@ -54,13 +62,19 @@ if [[ -f $stderred_path ]]; then
 	export LD_PRELOAD="${stderred_path}${LD_PRELOAD:+:$LD_PRELOAD}"
 fi
 
-# Toggle the right prompt. Necessary with large repositories and slow drives.
+# Only call the slow git_prompt_status function when we really want it.
+git_prompt_status_t() {
+	if [[ -n "$GIT_PROMPT_STATUS_ON" ]]; then
+		git_prompt_status
+	fi
+}
+
+# Toggle the slow part of the right prompt. Off by default, to speed things up.
 rptoggle() {
-	if [[ -n "$RPROMPT" ]]; then
-		R="$RPROMPT"
-		RPROMPT=""
+	if [[ -n "$GIT_PROMPT_STATUS_ON" ]]; then
+		GIT_PROMPT_STATUS_ON=
 	else
-		RPROMPT="$R"
+		GIT_PROMPT_STATUS_ON=1
 	fi
 }
 

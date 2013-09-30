@@ -84,8 +84,6 @@ alias :Q=exit
 alias t=true
 alias nil=false
 
-alias grep='grep --color=auto --line-number'
-
 if [[ "$(uname)" == 'Darwin' ]]; then
    # BSD ls
    alias ls='ls -FGh'
@@ -94,10 +92,8 @@ else
    alias ls='ls --color=auto --classify --human-readable'
 fi
 
+alias grep='grep --color=auto --line-number'
 alias gst='git status --short --branch'
-
 alias pun='phpunit --colors --verbose'
-
 alias ta='tmux attach'
-
 alias vlc='vlc --extraintf oldrc --rc-unix /tmp/vlc.sock'

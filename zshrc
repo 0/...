@@ -97,3 +97,7 @@ alias gst='git status --short --branch'
 alias pun='phpunit --colors --verbose'
 alias ta='tmux attach'
 alias vlc='vlc --extraintf oldrc --rc-unix /tmp/vlc.sock'
+
+if [[ -f ~/.zshrc.local ]]; then
+	source ~/.zshrc.local
+fi

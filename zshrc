@@ -85,7 +85,14 @@ alias t=true
 alias nil=false
 
 alias grep='grep --color=auto --line-number'
-alias ls='ls --color=auto --classify --human-readable'
+
+if [[ "$(uname)" == 'Darwin' ]]; then
+   # BSD ls
+   alias ls='ls -FGh'
+else
+   # GNU ls
+   alias ls='ls --color=auto --classify --human-readable'
+fi
 
 alias gst='git status --short --branch'
 

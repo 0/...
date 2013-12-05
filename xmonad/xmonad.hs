@@ -205,6 +205,8 @@ myMouseBindings = fromList
   , ((myModMask, X.button5), const $ X.sendMessage X.Shrink)
   , ((myModMask .|. X.shiftMask, X.button4), const $ X.sendMessage Resiz.MirrorExpand)
   , ((myModMask .|. X.shiftMask, X.button5), const $ X.sendMessage Resiz.MirrorShrink)
+  , ((X.noModMask, 10 :: X.Button), const $ actOnNonEmptyWorkspace goToWorkspace)
+  , ((X.noModMask, 13 :: X.Button), const $ workspaceLeaveWrapper toggleNonEmptyWS)
   ]
   where snapTolerance = Just 50
         windowAction action1 action2 w = do

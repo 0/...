@@ -1,6 +1,8 @@
 /ghc/*
 !/ghc/ghci.conf
 
+/pip/pip.log
+
 /xmonad/history
 /xmonad/xmonad*
 !/xmonad/xmonad.hs

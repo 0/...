@@ -77,6 +77,9 @@ export SUDO_PROMPT='%p to sudo as %U: '
 
 export PATH=~/.cabal/bin:~/.gem/ruby/1.9.1/bin:"$PATH"
 
+# Where pip wheel should store built packages.
+export WHEELHOUSE=~/.cache/wheelhouse
+
 stderred_path='/usr/lib/libstderred.so'
 
 if [[ -f $stderred_path ]]; then
@@ -99,6 +102,25 @@ rptoggle() {
 	fi
 }
 
+# Activate a virtualenv from anywhere inside it.
+vact() {
+	local last=""
+	local dir="$(pwd)"
+
+	while [[ "$last" != "$dir" ]]; do
+		local try="${dir}/bin/activate"
+
+		if [[ -f "$try" ]]; then
+			. "$try"
+
+			return
+		fi
+
+		last="$dir"
+		dir="$(dirname "$dir")"
+	done
+}
+
 alias :q=exit
 alias :Q=exit
 
@@ -115,6 +137,11 @@ fi
 
 alias grep='grep --color=auto --line-number'
 alias gst='git status --short --branch'
+# Install wheels only from the wheelhouse.
+alias pipwhl='pip install --no-index --find-links="$WHEELHOUSE"'
+# Build a wheel from PyPI and put it in the wheelhouse.
+# The --find-links option is necessary so that it doesn't rebuild things.
+alias pipwhlmk='pip wheel --wheel-dir="$WHEELHOUSE" --find-links="$WHEELHOUSE"'
 alias pun='phpunit --colors --verbose'
 alias ta='tmux attach'
 alias vlc='vlc --extraintf oldrc --rc-unix /tmp/vlc.sock'

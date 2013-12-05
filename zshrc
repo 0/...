@@ -37,6 +37,11 @@ COMPLETION_WAITING_DOTS="true"
 # much faster.
 # DISABLE_UNTRACKED_FILES_DIRTY="true"
 
+# Uncomment following line if you want to  shown in the command execution time stamp 
+# in the history command output. The optional three formats: "mm/dd/yyyy"|"dd.mm.yyyy"|
+# yyyy-mm-dd
+# HIST_STAMPS="mm/dd/yyyy"
+
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
@@ -44,7 +49,23 @@ plugins=(brew colored-man cp extract git history-substring-search pip virtualenv
 
 source $ZSH/oh-my-zsh.sh
 
-# Customize to your needs...
+# User configuration
+
+export PATH=$HOME/bin:/usr/local/bin:$PATH
+# export MANPATH="/usr/local/man:$MANPATH"
+
+# # Preferred editor for local and remote sessions
+# if [[ -n $SSH_CONNECTION ]]; then
+#   export EDITOR='vim'
+# else
+#   export EDITOR='mvim'
+# fi
+
+# Compilation flags
+# export ARCHFLAGS="-arch x86_64"
+
+# ssh
+# export SSH_KEY_PATH="~/.ssh/dsa_id"
 
 setopt hist_ignore_all_dups interactivecomments
 unsetopt sharehistory
@@ -54,7 +75,7 @@ ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 export EDITOR=vim
 export SUDO_PROMPT='%p to sudo as %U: '
 
-export PATH=~/.cabal/bin:~/.gem/ruby/1.9.1/bin:~/bin:"$PATH"
+export PATH=~/.cabal/bin:~/.gem/ruby/1.9.1/bin:"$PATH"
 
 stderred_path='/usr/lib/libstderred.so'
 

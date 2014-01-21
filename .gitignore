@@ -2,6 +2,7 @@
 !/ghc/ghci.conf
 
 /pip/pip.log
+/pip/zsh-cache
 
 /xmonad/history
 /xmonad/xmonad*

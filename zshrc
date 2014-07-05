@@ -143,7 +143,11 @@ alias pipwhl='pip install --no-index --find-links="$WHEELHOUSE"'
 # The --find-links option is necessary so that it doesn't rebuild things.
 alias pipwhlmk='pip wheel --wheel-dir="$WHEELHOUSE" --find-links="$WHEELHOUSE"'
 alias pun='phpunit --colors --verbose'
+# Without connection sharing.
+alias ssh-fresh='ssh -S none'
 alias ta='tmux attach'
+alias tree='tree -C'
+alias vimpg='vim -R -'
 alias vlc='vlc --extraintf oldrc --rc-unix /tmp/vlc.sock'
 
 if [[ -f ~/.zshrc.local ]]; then

@@ -128,11 +128,11 @@ alias t=true
 alias nil=false
 
 if [[ "$(uname)" == 'Darwin' ]]; then
-   # BSD ls
-   alias ls='ls -FGh'
+	# BSD ls
+	alias ls='ls -FGh'
 else
-   # GNU ls
-   alias ls='ls --color=auto --classify --human-readable'
+	# GNU ls
+	alias ls='ls --color=auto --classify --human-readable'
 fi
 
 alias grep='grep --color=auto --line-number'

@@ -1,5 +1,4 @@
-Config { font = "DejaVu Sans Mono-8"
-       , bgColor = "black"
+Config { bgColor = "black"
        , fgColor = "grey"
        , lowerOnStart = True
        , position = Top

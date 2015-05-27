@@ -166,8 +166,10 @@ myKeyBindings =
   , ("M-M1-<R>", X.catchIO $ VLC.right myVLCSock)
   , ("M-M1-<D>", X.catchIO $ VLC.voldn myVLCSock)
   , ("M-M1-<U>", X.catchIO $ VLC.volup myVLCSock)
-  , ("<XF86MonBrightnessDown>", X.spawn "xbacklight -steps 1 -time 0 -10")
-  , ("<XF86MonBrightnessUp>", X.spawn "xbacklight -steps 1 -time 0 +10")
+  , ("<XF86MonBrightnessDown>", X.spawn "xbacklight -steps 1 -time 0 -dec 2")
+  , ("S-<XF86MonBrightnessDown>", X.spawn "xbacklight -dec 10")
+  , ("<XF86MonBrightnessUp>", X.spawn "xbacklight -steps 1 -time 0 -inc 2")
+  , ("S-<XF86MonBrightnessUp>", X.spawn "xbacklight -inc 10")
   -- Screenshots.
   , ("<Print>", X.spawn "~/bin/screenshot")
   , ("S-<Print> w", X.spawn "~/bin/screenshot window")

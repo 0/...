@@ -45,7 +45,7 @@ COMPLETION_WAITING_DOTS="true"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(brew colored-man cp extract git history-substring-search pip virtualenv zsh-syntax-highlighting)
+plugins=(brew cabal colored-man cp extract git history-substring-search nmap pip virtualenv zsh-syntax-highlighting)
 
 source $ZSH/oh-my-zsh.sh
 

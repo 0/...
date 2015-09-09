@@ -150,6 +150,13 @@ alias tree='tree -C'
 alias vimpg='vim -R -'
 alias vlc='vlc --extraintf oldrc --rc-unix /tmp/vlc.sock'
 
+# Install useful things in a virtualenv.
+venv_init() {
+	easy_install readline
+	pip install wheel
+	pipwhl ipdb ipython pep8
+}
+
 if [[ -f ~/.zshrc.local ]]; then
 	source ~/.zshrc.local
 fi

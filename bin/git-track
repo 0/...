@@ -10,4 +10,4 @@ fi
 
 branch="$(git symbolic-ref HEAD | cut -d/ -f3)"
 
-git branch --set-upstream "$branch" "${remote}/${branch}"
+git branch -u "${remote}/${branch}" "$branch"

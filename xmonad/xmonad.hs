@@ -13,6 +13,7 @@ import qualified XMonad.Actions.DynamicWorkspaces as DynaW
 import qualified XMonad.Actions.FloatSnap as Snap
 import qualified XMonad.Actions.Warp as Warp
 
+import qualified XMonad.Hooks.DynamicBars as Bars
 import qualified XMonad.Hooks.DynamicLog as DLog
 import qualified XMonad.Hooks.ManageDocks as Docks
 import qualified XMonad.Hooks.ToggleHook as THook
@@ -49,8 +50,7 @@ import qualified XMonad.Layout.CompactName as Compact
 -- This configuration requires xmonad >=0.11.
 
 
-main = do xmobar <- Run.spawnPipe "xmobar"
-          X.xmonad $ myXConfig xmobar
+main = X.xmonad myXConfig
 
 {----------------
 -  Colors, &c.  -
@@ -221,8 +221,8 @@ myMouseBindings = fromList
 -  Status bar  -
 ---------------}
 
-myLogPP :: Handle -> [X.WorkspaceId] -> DLog.PP
-myLogPP h copies = DLog.defaultPP
+myLogPP :: [X.WorkspaceId] -> DLog.PP
+myLogPP copies = DLog.defaultPP
   { DLog.ppCurrent = DLog.xmobarColor myCurrentFG myCurrentBG . DLog.pad
   , DLog.ppVisible = DLog.xmobarColor myVisibleFG myVisibleBG . DLog.pad
   , DLog.ppHidden  = checkCopies myNormalFG myNormalBG
@@ -230,11 +230,21 @@ myLogPP h copies = DLog.defaultPP
   , DLog.ppTitle   = DLog.xmobarColor mySpecial1FG mySpecial1BG . DLog.shorten 75
   , DLog.ppLayout  = DLog.xmobarColor mySpecial2FG mySpecial2BG
   , DLog.ppSep     = DLog.pad $ DLog.xmobarColor mySeparatorFG mySeparatorBG "|"
-  , DLog.ppOutput  = Run.hPutStrLn h
   }
   where checkCopies usualFG usualBG ws
           | ws `elem` copies = DLog.xmobarColor myCopyFG usualBG ws
           | otherwise = DLog.xmobarColor usualFG usualBG ws
+
+myLogPPActive :: [X.WorkspaceId] -> DLog.PP
+myLogPPActive copies = (myLogPP copies)
+  { DLog.ppCurrent = DLog.xmobarColor myCurrentBG myCurrentFG . DLog.pad
+  }
+
+barCreator :: Bars.DynamicStatusBar
+barCreator (X.S sid) = Run.spawnPipe $ "xmobar --screen " ++ show sid
+
+barDestroyer :: Bars.DynamicStatusBarCleanup
+barDestroyer = return ()
 
 {-------------------------
 -  Workspaces & layouts  -
@@ -340,7 +350,7 @@ myLayout =
 -  Customized configs  -
 -----------------------}
 
-myXConfig h =
+myXConfig =
   let uHook = Urg.BorderUrgencyHook
                 { Urg.urgencyBorderColor = myUrgentBG
                 }
@@ -368,11 +378,14 @@ myXConfig h =
      conf
        { X.startupHook = do EZ.checkKeymap conf myKeyBindings
                             Cur.setDefaultCursor Cur.xC_crosshair
+                            Bars.dynStatusBarStartup barCreator barDestroyer
                             -- Allow window copies to be highlighted in the
                             -- status bar.
        , X.logHook     = do copies <- CopyW.wsContainingCopies
                             WH.workspaceHistoryHook
-                            DLog.dynamicLogWithPP $ myLogPP h copies
+                            Bars.multiPP (myLogPPActive copies)
+                                         (myLogPP copies)
+       , X.handleEventHook = Bars.dynStatusBarEventHook barCreator barDestroyer
        }
 
 myGSConfig :: Grid.GSConfig X.WorkspaceId

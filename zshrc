@@ -70,6 +70,12 @@ export PATH=$HOME/bin:/usr/local/bin:$PATH
 setopt hist_ignore_all_dups interactivecomments
 unsetopt sharehistory
 
+export TIMEFMT="${TIMEFMT}
+space used: %K KB
+max memory: %M MB
+page faults: %F, %R
+context switches: %w, %c"
+
 ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 
 export EDITOR=vim
@@ -79,6 +85,8 @@ export PATH=~/.cabal/bin:~/.gem/ruby/1.9.1/bin:"$PATH"
 
 # Where pip wheel should store built packages.
 export WHEELHOUSE=~/.cache/wheelhouse
+
+export LESSHISTFILE=/dev/null
 
 stderred_path='/usr/lib/libstderred.so'
 
@@ -135,13 +143,21 @@ else
 	alias ls='ls --color=auto --classify --human-readable'
 fi
 
+# Replace newlines with commas, but leave the final newline as is.
+alias comma="tr '\n' , | rev | cut -c 2- | rev"
 alias grep='grep --color=auto --line-number'
 alias gst='git status --short --branch'
+alias mytop='htop -u "${USER}"'
+alias pathto="readlink -f"
 # Install wheels only from the wheelhouse.
 alias pipwhl='pip install --no-index --find-links="$WHEELHOUSE"'
+alias pipwhl2='pip2 install --no-index --find-links="$WHEELHOUSE"'
+alias pipwhl3='pip3 install --no-index --find-links="$WHEELHOUSE"'
 # Build a wheel from PyPI and put it in the wheelhouse.
 # The --find-links option is necessary so that it doesn't rebuild things.
 alias pipwhlmk='pip wheel --wheel-dir="$WHEELHOUSE" --find-links="$WHEELHOUSE"'
+alias pipwhlmk2='pip2 wheel --wheel-dir="$WHEELHOUSE" --find-links="$WHEELHOUSE"'
+alias pipwhlmk3='pip3 wheel --wheel-dir="$WHEELHOUSE" --find-links="$WHEELHOUSE"'
 alias pun='phpunit --colors --verbose'
 # Without connection sharing.
 alias ssh-fresh='ssh -S none'

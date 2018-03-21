@@ -13,5 +13,3 @@
       (require :sb-aclrepl)
       (require :linedit)
       (funcall (intern "INSTALL-REPL" :linedit) :wrap-current t :eof-quits t)))
-
-(setf linedit:*highlight-color* :red)

@@ -3,6 +3,7 @@ import Control.Monad ((>=>), join, liftM, when)
 import Data.Map (Map(), fromList)
 import Data.Maybe (isJust, isNothing)
 
+import System.Exit (ExitCode(ExitSuccess), exitWith)
 import System.IO (Handle())
 
 import XMonad ((-->), (.|.), (=?))
@@ -177,7 +178,10 @@ myKeyBindings =
   -- Miscellaneous utilities.
   , ("M-n", X.refresh)
   , ("M1-<Space>", X.spawn "urxvt -e alsamixer")
+  , ("M-M1-f", X.spawn "/usr/bin/kill -SIGSTOP firefox")
+  , ("M-M1-S-f", X.spawn "/usr/bin/kill -SIGCONT firefox")
   , ("M-x q", X.spawn "xmonad --recompile && xmonad --restart")
+  , ("M-C-M1-S-x q", X.io (exitWith ExitSuccess))
   ]
   ++
   -- Convenient shortcuts for simple workspaces.

@@ -4,3 +4,6 @@ ControlPath /tmp/ssh_mux_%h_%p_%r
 
 # Persistent connections.
 ControlPersist 5m
+
+IdentitiesOnly yes
+VisualHostKey yes

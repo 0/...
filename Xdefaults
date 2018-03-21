@@ -21,6 +21,8 @@
 *.color14: #00f5e9
 *.color15: #eeeeec
 
+urxvt.font: xft:hack:size=12
+urxvt.boldFont: xft:hack:size=12:style=bold
 urxvt.iso14755_52: false
 urxvt.saveLines: 32767
 urxvt.scrollBar: false

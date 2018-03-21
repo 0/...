@@ -72,8 +72,7 @@ mySeparatorFG = "#000066"
 mySeparatorBG = "#000033"
 myCopyFG      = "#ff0000"
 
-myFont  = "DejaVu Sans Mono-8"
-myFont' = "xft:" ++ myFont
+myFont = "xft:Hack-12"
 
 myTerminal        = "urxvt"
 myModMask         = X.mod4Mask
@@ -389,7 +388,7 @@ myXConfig =
 
 myGSConfig :: Grid.GSConfig X.WorkspaceId
 myGSConfig = Grid.defaultGSConfig
-  { Grid.gs_font       = myFont'
+  { Grid.gs_font       = myFont
   , Grid.gs_navigate   = Grid.navNSearch
   , Grid.gs_rearranger = Grid.searchStringRearrangerGenerator id
   }

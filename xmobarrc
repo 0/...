@@ -1,5 +1,6 @@
 Config { bgColor = "black"
        , fgColor = "grey"
+       , font = "xft:Hack-12"
        , lowerOnStart = True
        , position = Top
        , commands = [ Run Date "%d %a %H:%M:%S" "date" 100

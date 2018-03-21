@@ -76,7 +76,7 @@ myFont = "xft:Hack-12"
 
 myTerminal        = "urxvt"
 myModMask         = X.mod4Mask
-myExternalMonitor = "VGA1"
+myExternalMonitor = "HDMI-1"
 myVLCSock         = "/tmp/vlc.sock"
 
 {------------------------------

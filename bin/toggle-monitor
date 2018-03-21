@@ -37,9 +37,9 @@ output_on=$?
 
 # Toggle the state.
 if [ ${output_connected} -eq 1 ] && [ ${output_on} -eq 1 ]; then
-	echo "Enabling output '${output_name}' right of LVDS1."
+	echo "Enabling output '${output_name}' right of LVDS-1."
 
-	xrandr --output "${output_name}" --preferred --right-of LVDS1
+	xrandr --output "${output_name}" --preferred --right-of LVDS-1
 
 	exit 0
 elif [ ${output_on} -eq 0 ]; then

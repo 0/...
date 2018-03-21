@@ -1,10 +1,7 @@
 #!/bin/sh
 
-# Run pm-suspend as root and with the correct quirks, if any.
-
-QUIRKS=""
-
+# Lock the screen and suspend.
 
 ~/bin/xlock
 
-sudo pm-suspend $QUIRKS
+systemctl suspend

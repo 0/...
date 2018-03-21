@@ -47,10 +47,10 @@ import qualified XMonad.Hooks.WorkspaceHistory as WH
 import qualified XMonad.Layout.CompactName as Compact
 
 
--- This configuration requires xmonad >=0.11.
+-- This configuration requires xmonad >=0.13.
 
 
-main = X.xmonad myXConfig
+main = X.xmonad $ Docks.docks myXConfig
 
 {----------------
 -  Colors, &c.  -
@@ -359,7 +359,6 @@ myXConfig =
                 }
       man   = X.composeAll
                 [ X.className =? "Xmessage" --> X.doFloat
-                , Docks.manageDocks
                 ]
       conf  = X.defaultConfig
                 { X.terminal           = myTerminal

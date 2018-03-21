@@ -9,7 +9,6 @@ import System.IO (Handle())
 import XMonad ((-->), (.|.), (=?))
 import qualified XMonad as X
 
-import qualified XMonad.Actions.CopyWindow as CopyW
 import qualified XMonad.Actions.DynamicWorkspaces as DynaW
 import qualified XMonad.Actions.FloatSnap as Snap
 import qualified XMonad.Actions.Warp as Warp
@@ -21,15 +20,12 @@ import qualified XMonad.Hooks.ToggleHook as THook
 import qualified XMonad.Hooks.UrgencyHook as Urg
 
 import qualified XMonad.Layout.BoringWindows as Boring
-import qualified XMonad.Layout.LayoutScreens as Screens
-import qualified XMonad.Layout.Magnifier as Mag
 import qualified XMonad.Layout.Minimize as Min
 import qualified XMonad.Layout.MultiToggle as Multi
 import qualified XMonad.Layout.MultiToggle.Instances as MultiI
 import qualified XMonad.Layout.Reflect as Refl
 import qualified XMonad.Layout.ResizableTile as Resiz
 import qualified XMonad.Layout.ToggleLayouts as TogL
-import qualified XMonad.Layout.TwoPane as TwoP
 
 import qualified XMonad.StackSet as W
 
@@ -87,10 +83,7 @@ myVLCSock         = "/tmp/vlc.sock"
 myKeyBindings :: [(String, X.X ())]
 myKeyBindings =
   [ ("M-z", X.spawn myTerminal)
-  -- Close only focused instance of focused window.
-  , ("M-S-c", CopyW.kill1)
-  -- Close all other instances of focused window.
-  , ("M-C-S-c", CopyW.killAllOtherCopies)
+  , ("M-S-c", X.kill)
   -- Focus and arrange windows.
   , ("M-<Tab>", Boring.focusDown)
   , ("M-j", Boring.focusDown)
@@ -112,9 +105,6 @@ myKeyBindings =
   , ("M-.", X.sendMessage (X.IncMasterN (-1)))
   -- Layout toggles.
   , ("M-C-s", X.sendMessage Docks.ToggleStruts)
-  , ("M-C--", X.sendMessage Mag.MagnifyLess)
-  , ("M-C-=", X.sendMessage Mag.MagnifyMore)
-  , ("M-C-z", X.sendMessage Mag.Toggle)
   , ("M-C-m", X.sendMessage $ Multi.Toggle MultiI.MIRROR)
   , ("M-C-b", X.sendMessage $ Multi.Toggle MultiI.NOBORDERS)
   , ("M-C-x", X.sendMessage $ Multi.Toggle Refl.REFLECTX)
@@ -129,14 +119,9 @@ myKeyBindings =
   , ("M-d", actOnNonEmptyWorkspace goToWorkspace)
   -- Dynamic workspaces.
   , ("M-S-d m", actOnNonEmptyWorkspace shiftToWorkspace)
-  , ("M-S-d c", actOnNonEmptyWorkspace copyToWorkspace)
   , ("M-S-d r", actOnNonEmptyWorkspace renameWorkspace)
   -- Physical screens.
   , ("<XF86Display>", X.spawn ("~/bin/toggle-monitor " ++ myExternalMonitor))
-  -- Virtual screens.
-  , ("M-g 1", Screens.layoutSplitScreen 2 (TwoP.TwoPane 0.5 0.5))
-  , ("M-g 2", Screens.layoutSplitScreen 2 (X.Mirror $ TwoP.TwoPane 0.5 0.5))
-  , ("M-g 3", X.rescreen)
   -- Boring windows.
   , ("M-b", X.withFocused Min.minimizeWindow)
   , ("M-S-b", X.sendMessage Min.RestoreNextMinimizedWin)
@@ -174,7 +159,6 @@ myKeyBindings =
   , ("<Print>", X.spawn "~/bin/screenshot")
   , ("S-<Print> w", X.spawn "~/bin/screenshot window")
   , ("S-<Print> r", X.spawn "~/bin/screenshot root")
-  , ("S-<Print> u", X.spawn "~/bin/upload_screenshot")
   -- Miscellaneous utilities.
   , ("M-n", X.refresh)
   , ("M1-<Space>", X.spawn "urxvt -e alsamixer")
@@ -224,22 +208,19 @@ myMouseBindings = fromList
 -  Status bar  -
 ---------------}
 
-myLogPP :: [X.WorkspaceId] -> DLog.PP
-myLogPP copies = DLog.defaultPP
+myLogPP :: DLog.PP
+myLogPP = DLog.defaultPP
   { DLog.ppCurrent = DLog.xmobarColor myCurrentFG myCurrentBG . DLog.pad
   , DLog.ppVisible = DLog.xmobarColor myVisibleFG myVisibleBG . DLog.pad
-  , DLog.ppHidden  = checkCopies myNormalFG myNormalBG
+  , DLog.ppHidden  = DLog.xmobarColor myNormalFG myNormalBG
   , DLog.ppUrgent  = DLog.xmobarColor myUrgentFG myUrgentBG . DLog.wrap ">" "<" . DLog.xmobarStrip
   , DLog.ppTitle   = DLog.xmobarColor mySpecial1FG mySpecial1BG . DLog.shorten 75
   , DLog.ppLayout  = DLog.xmobarColor mySpecial2FG mySpecial2BG
   , DLog.ppSep     = DLog.pad $ DLog.xmobarColor mySeparatorFG mySeparatorBG "|"
   }
-  where checkCopies usualFG usualBG ws
-          | ws `elem` copies = DLog.xmobarColor myCopyFG usualBG ws
-          | otherwise = DLog.xmobarColor usualFG usualBG ws
 
-myLogPPActive :: [X.WorkspaceId] -> DLog.PP
-myLogPPActive copies = (myLogPP copies)
+myLogPPActive :: DLog.PP
+myLogPPActive = myLogPP
   { DLog.ppCurrent = DLog.xmobarColor myCurrentBG myCurrentFG . DLog.pad
   }
 
@@ -317,11 +298,6 @@ shiftToWorkspace :: X.WorkspaceId -> X.X ()
 shiftToWorkspace w = do DynaW.addHiddenWorkspace w
                         X.windows $ W.shift w
 
--- Copy the current window to the workspace, creating it first if necessary.
-copyToWorkspace :: X.WorkspaceId -> X.X ()
-copyToWorkspace w = do DynaW.addHiddenWorkspace w
-                       X.windows $ CopyW.copy w
-
 -- Rename the workspace and do some bookkeeping.
 renameWorkspace :: X.WorkspaceId -> X.X ()
 renameWorkspace w = X.withWindowSet $ \ws -> do
@@ -344,7 +320,6 @@ myLayout =
      Multi.mkToggle1 Refl.REFLECTY $
      -- Mirror must be applied first for X and Y reflections to make sense.
      Multi.mkToggle1 MultiI.MIRROR $
-     Mag.magnifierOff $
      Boring.boringWindows $
      Min.minimize $
      TogL.toggleLayouts full tall
@@ -381,12 +356,8 @@ myXConfig =
        { X.startupHook = do EZ.checkKeymap conf myKeyBindings
                             Cur.setDefaultCursor Cur.xC_crosshair
                             Bars.dynStatusBarStartup barCreator barDestroyer
-                            -- Allow window copies to be highlighted in the
-                            -- status bar.
-       , X.logHook     = do copies <- CopyW.wsContainingCopies
-                            WH.workspaceHistoryHook
-                            Bars.multiPP (myLogPPActive copies)
-                                         (myLogPP copies)
+       , X.logHook     = do WH.workspaceHistoryHook
+                            Bars.multiPP myLogPPActive myLogPP
        , X.handleEventHook = Bars.dynStatusBarEventHook barCreator barDestroyer
        }
 

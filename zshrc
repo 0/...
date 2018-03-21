@@ -81,8 +81,6 @@ ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 export EDITOR=vim
 export SUDO_PROMPT='%p to sudo as %U: '
 
-export PATH=~/.cabal/bin:~/.gem/ruby/1.9.1/bin:"$PATH"
-
 # Where pip wheel should store built packages.
 export WHEELHOUSE=~/.cache/wheelhouse
 

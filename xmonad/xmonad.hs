@@ -161,7 +161,6 @@ myKeyBindings =
   , ("S-<Print> w", X.spawn "~/bin/screenshot window")
   , ("S-<Print> r", X.spawn "~/bin/screenshot root")
   -- Miscellaneous utilities.
-  , ("M-n", X.refresh)
   , ("M1-<Space>", X.spawn "urxvt -e alsamixer")
   , ("M-M1-f", X.spawn "/usr/bin/kill -SIGSTOP firefox")
   , ("M-M1-S-f", X.spawn "/usr/bin/kill -SIGCONT firefox")

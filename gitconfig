@@ -23,10 +23,6 @@
 	path = ~/.gitconfig.local
 [merge]
 	conflictstyle = diff3
-	tool = splice
-[mergetool "splice"]
-	cmd = "gvim -f $BASE $LOCAL $REMOTE $MERGED -c 'SpliceInit'"
-	trustExitCode = true
 [push]
 	default = nothing
 [rebase]
@@ -36,7 +32,3 @@
 	enabled = true
 [remote "origin"]
 	skipDefaultUpdate = true
-[url "git://github.com/"]
-	insteadOf = gh:
-[url "git@github.com:"]
-	insteadOf = gh-ssh:

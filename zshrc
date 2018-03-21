@@ -45,7 +45,7 @@ COMPLETION_WAITING_DOTS="true"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(brew cabal colored-man cp extract git history-substring-search nmap pip virtualenv zsh-syntax-highlighting)
+plugins=(colored-man extract git history-substring-search virtualenv zsh-syntax-highlighting)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -81,9 +81,6 @@ ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)
 export EDITOR=vim
 export SUDO_PROMPT='%p to sudo as %U: '
 
-# Where pip wheel should store built packages.
-export WHEELHOUSE=~/.cache/wheelhouse
-
 export LESSHISTFILE=/dev/null
 
 stderred_path='/usr/lib/libstderred.so'
@@ -96,15 +93,6 @@ fi
 git_prompt_status_t() {
 	if [[ -n "$GIT_PROMPT_STATUS_ON" ]]; then
 		git_prompt_status
-	fi
-}
-
-# Toggle the slow part of the right prompt. Off by default, to speed things up.
-rptoggle() {
-	if [[ -n "$GIT_PROMPT_STATUS_ON" ]]; then
-		GIT_PROMPT_STATUS_ON=
-	else
-		GIT_PROMPT_STATUS_ON=1
 	fi
 }
 
@@ -147,29 +135,12 @@ alias grep='grep --color=auto --line-number'
 alias gst='git status --short --branch'
 alias mytop='htop -u "${USER}"'
 alias pathto="readlink -f"
-# Install wheels only from the wheelhouse.
-alias pipwhl='pip install --no-index --find-links="$WHEELHOUSE"'
-alias pipwhl2='pip2 install --no-index --find-links="$WHEELHOUSE"'
-alias pipwhl3='pip3 install --no-index --find-links="$WHEELHOUSE"'
-# Build a wheel from PyPI and put it in the wheelhouse.
-# The --find-links option is necessary so that it doesn't rebuild things.
-alias pipwhlmk='pip wheel --wheel-dir="$WHEELHOUSE" --find-links="$WHEELHOUSE"'
-alias pipwhlmk2='pip2 wheel --wheel-dir="$WHEELHOUSE" --find-links="$WHEELHOUSE"'
-alias pipwhlmk3='pip3 wheel --wheel-dir="$WHEELHOUSE" --find-links="$WHEELHOUSE"'
-alias pun='phpunit --colors --verbose'
 # Without connection sharing.
 alias ssh-fresh='ssh -S none'
 alias ta='tmux attach'
 alias tree='tree -C'
 alias vimpg='vim -R -'
 alias vlc='vlc --extraintf oldrc --rc-unix /tmp/vlc.sock'
-
-# Install useful things in a virtualenv.
-venv_init() {
-	easy_install readline
-	pip install wheel
-	pipwhl ipdb ipython pep8
-}
 
 if [[ -f ~/.zshrc.local ]]; then
 	source ~/.zshrc.local

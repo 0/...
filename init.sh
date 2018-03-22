@@ -12,6 +12,7 @@ DOTFILES="$1"
 #ln -sT "$DOTFILES"/Xdefaults ~/.Xdefaults
 #ln -sT "$DOTFILES"/abcde.conf ~/.abcde.conf
 #ln -sT "$DOTFILES"/bin ~/bin
+#ln -sT "$DOTFILES"/clisprc ~/.clisprc
 #ln -sT "$DOTFILES"/ghc ~/.ghc
 #ln -sT "$DOTFILES"/gitconfig ~/.gitconfig
 #ln -sT "$DOTFILES"/gitignore ~/.gitignore
@@ -32,4 +33,5 @@ DOTFILES="$1"
 #ln -sT "$DOTFILES"/zshrc ~/.zshrc
 
 #mkdir -p ~/.config
+#ln -sT ../"$DOTFILES"/config/htop ~/.config/htop
 #ln -sT ../"$DOTFILES"/config/matplotlib ~/.config/matplotlib

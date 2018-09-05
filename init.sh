@@ -17,7 +17,6 @@ DOTFILES="$1"
 #ln -sT "$DOTFILES"/gitconfig ~/.gitconfig
 #ln -sT "$DOTFILES"/gitignore ~/.gitignore
 #ln -sT "$DOTFILES"/inputrc ~/.inputrc
-#ln -sT "$DOTFILES"/juliarc.jl ~/.juliarc.jl
 #ln -sT "$DOTFILES"/mspdebug ~/.mspdebug
 #ln -sT "$DOTFILES"/nethackrc ~/.nethackrc
 #ln -sT "$DOTFILES"/oh-my-zsh ~/.oh-my-zsh
@@ -35,3 +34,6 @@ DOTFILES="$1"
 #mkdir -p ~/.config
 #ln -sT ../"$DOTFILES"/config/htop ~/.config/htop
 #ln -sT ../"$DOTFILES"/config/matplotlib ~/.config/matplotlib
+
+#mkdir -p ~/.julia
+#ln -sT "$DOTFILES"/julia/config ~/.julia/config

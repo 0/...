@@ -4,4 +4,4 @@
 
 ~/bin/xlock
 
-systemctl suspend
+systemctl suspend --ignore-inhibitors

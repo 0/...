@@ -11,7 +11,10 @@ module VLC
     , volup
     ) where
 
-import qualified Network as N
+import qualified Data.ByteString.Char8 as B
+
+import Network.Socket hiding (send, sendTo, recv, recvFrom)
+import Network.Socket.ByteString
 
 import qualified System.IO as IO
 
@@ -28,8 +31,9 @@ volup = talkToVLC' "volup 1"
 
 
 talkToVLC :: String -> String -> IO ()
-talkToVLC path msg = do h <- N.connectTo "" $ N.UnixSocket path
-                        IO.hPutStrLn h msg
-                        IO.hClose h
+talkToVLC path msg = do s <- socket AF_UNIX Stream 0
+                        connect s $ SockAddrUnix path
+                        send s $ B.pack msg
+                        close s
 
 talkToVLC' = flip talkToVLC

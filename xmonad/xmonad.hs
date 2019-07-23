@@ -11,6 +11,7 @@ import qualified XMonad as X
 
 import qualified XMonad.Actions.DynamicWorkspaces as DynaW
 import qualified XMonad.Actions.FloatSnap as Snap
+import qualified XMonad.Actions.Minimize as MinA
 import qualified XMonad.Actions.Warp as Warp
 
 import qualified XMonad.Hooks.DynamicBars as Bars
@@ -20,7 +21,7 @@ import qualified XMonad.Hooks.ToggleHook as THook
 import qualified XMonad.Hooks.UrgencyHook as Urg
 
 import qualified XMonad.Layout.BoringWindows as Boring
-import qualified XMonad.Layout.Minimize as Min
+import qualified XMonad.Layout.Minimize as MinL
 import qualified XMonad.Layout.MultiToggle as Multi
 import qualified XMonad.Layout.MultiToggle.Instances as MultiI
 import qualified XMonad.Layout.Reflect as Refl
@@ -123,8 +124,8 @@ myKeyBindings =
   -- Physical screens.
   , ("<XF86Display>", X.spawn ("~/bin/toggle-monitor " ++ myExternalMonitor))
   -- Boring windows.
-  , ("M-b", X.withFocused Min.minimizeWindow)
-  , ("M-S-b", X.sendMessage Min.RestoreNextMinimizedWin)
+  , ("M-b", X.withFocused MinA.minimizeWindow)
+  , ("M-S-b", MinA.withLastMinimized MinA.maximizeWindow)
   -- Fling the cursor.
   , ("M-'", Warp.banishScreen Warp.LowerRight)
   -- Lock and suspend.
@@ -209,7 +210,7 @@ myMouseBindings = fromList
 ---------------}
 
 myLogPP :: DLog.PP
-myLogPP = DLog.defaultPP
+myLogPP = DLog.def
   { DLog.ppCurrent = DLog.xmobarColor myCurrentFG myCurrentBG . DLog.pad
   , DLog.ppVisible = DLog.xmobarColor myVisibleFG myVisibleBG . DLog.pad
   , DLog.ppHidden  = DLog.xmobarColor myNormalFG myNormalBG
@@ -321,7 +322,7 @@ myLayout =
      -- Mirror must be applied first for X and Y reflections to make sense.
      Multi.mkToggle1 MultiI.MIRROR $
      Boring.boringWindows $
-     Min.minimize $
+     MinL.minimize $
      TogL.toggleLayouts full tall
 
 {-----------------------
@@ -338,7 +339,7 @@ myXConfig =
       man   = X.composeAll
                 [ X.className =? "Xmessage" --> X.doFloat
                 ]
-      conf  = X.defaultConfig
+      conf  = X.def
                 { X.terminal           = myTerminal
                 , X.modMask            = myModMask
                 , X.normalBorderColor  = "#000099"
@@ -362,7 +363,7 @@ myXConfig =
        }
 
 myGSConfig :: Grid.GSConfig X.WorkspaceId
-myGSConfig = Grid.defaultGSConfig
+myGSConfig = Grid.def
   { Grid.gs_font       = myFont
   , Grid.gs_navigate   = Grid.navNSearch
   , Grid.gs_rearranger = Grid.searchStringRearrangerGenerator id

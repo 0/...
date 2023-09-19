@@ -19,7 +19,6 @@ DOTFILES="$1"
 #ln -sT "$DOTFILES"/inputrc ~/.inputrc
 #ln -sT "$DOTFILES"/mspdebug ~/.mspdebug
 #ln -sT "$DOTFILES"/nethackrc ~/.nethackrc
-#ln -sT "$DOTFILES"/oh-my-zsh ~/.oh-my-zsh
 #ln -sT "$DOTFILES"/racketrc ~/.racketrc
 #ln -sT "$DOTFILES"/sbclrc ~/.sbclrc
 #ln -sT "$DOTFILES"/screenrc ~/.screenrc

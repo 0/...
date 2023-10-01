@@ -2,16 +2,14 @@
 
 # Requires ImageMagick and xdotool.
 
-DIR=~/tmp/screenshots/
-LATEST=~/tmp/screenshot.png
+DIR=~/tmp/screenshots
+mkdir -p "$DIR"
 
 # yyyy-mm-dd_hh:mm:ss.nnnnnnnnn
 #
 # Nanoseconds are to prevent collisions in the unlikely event of rapid-fire
 # screenshot taking.
-dest="${DIR}$(date '+%F_%T.%N').png"
-
-mkdir -p "$DIR"
+dest="${DIR}/$(date '+%F_%T.%N').png"
 
 case "$1" in
 	root)
@@ -27,5 +25,3 @@ case "$1" in
 		import "$dest"
 		;;
 esac
-
-ln -sf "$dest" "$LATEST"

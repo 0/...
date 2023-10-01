@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 import numpy as np
 
@@ -73,7 +73,7 @@ if not compact:
 
 # Output data.
 if compact:
-    print '{0},{1}'.format(mean, serr)
+    print('{0},{1}'.format(mean, serr))
 else:
     hist_max_count = hist_counts.max()
     hist_max_value_len = max(map(lambda x: len(str(x)), hist_values))
@@ -83,18 +83,18 @@ else:
         value_spaces = ' ' * (hist_max_value_len - len(value_str))
         count_xs = 'X' * int(count * hist_width / hist_max_count)
 
-        print '{0}{1} {2}'.format(value_spaces, value_str, count_xs)
+        print('{0}{1} {2}'.format(value_spaces, value_str, count_xs))
 
-    print
-    print 'Number of values:   {0}'.format(num_values)
-    print 'Min:                {0}'.format(min_value)
-    print 'Max:                {0}'.format(max_value)
-    print 'Variance:           {0}'.format(std * std)
-    print 'Standard deviation: {0}'.format(std)
-    print
-    print 'Mean:               {0}'.format(mean)
+    print()
+    print('Number of values:   {0}'.format(num_values))
+    print('Min:                {0}'.format(min_value))
+    print('Max:                {0}'.format(max_value))
+    print('Variance:           {0}'.format(std * std))
+    print('Standard deviation: {0}'.format(std))
+    print()
+    print('Mean:               {0}'.format(mean))
 
     if median is not None:
-        print 'Median:             {0}'.format(median)
+        print('Median:             {0}'.format(median))
 
-    print 'Standard error:     {0}'.format(serr)
+    print('Standard error:     {0}'.format(serr))

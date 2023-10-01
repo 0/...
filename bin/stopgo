@@ -1,0 +1,20 @@
+#!/bin/bash
+
+while read pid rest; do
+	ps -o pgid=,state= "$pid" | tr -d '\n'
+	echo " $rest"
+done \
+| fzf --multi \
+| awk '{ print $1, $2 }' \
+| while read pgid state; do
+	[[ -z "$pgid" ]] && echo "No pgid." && exit 1
+	[[ -z "$state" ]] && echo "No state." && exit 1
+
+	if [[ "$state" == 'T' ]]; then
+		sig=CONT
+	else
+		sig=STOP
+	fi
+
+	/bin/kill -"$sig" -- -"$pgid"
+done

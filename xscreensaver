@@ -1,7 +1,11 @@
-timeout: 2:00:00
+timeout: 0:10:00
 cycle: 0:00:00
 lock: True
+lockTimeout: 0:00:00
+passwdTimeout: 0:00:30
 splash: False
 newLoginCommand:
 fade: False
+unfade: False
+dpmsEnabled: False
 mode: blank

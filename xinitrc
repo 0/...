@@ -1,3 +1,0 @@
-xscreensaver &
-
-exec xmonad

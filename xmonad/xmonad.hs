@@ -14,9 +14,10 @@ import qualified XMonad.Actions.FloatSnap as Snap
 import qualified XMonad.Actions.Minimize as MinA
 import qualified XMonad.Actions.Warp as Warp
 
-import qualified XMonad.Hooks.DynamicBars as Bars
-import qualified XMonad.Hooks.DynamicLog as DLog
+import qualified XMonad.Hooks.EwmhDesktops as Ewmh
 import qualified XMonad.Hooks.ManageDocks as Docks
+import qualified XMonad.Hooks.StatusBar as Bar
+import qualified XMonad.Hooks.StatusBar.PP as Bar.PP
 import qualified XMonad.Hooks.ToggleHook as THook
 import qualified XMonad.Hooks.UrgencyHook as Urg
 
@@ -32,6 +33,7 @@ import qualified XMonad.StackSet as W
 
 import qualified XMonad.Util.Cursor as Cur
 import qualified XMonad.Util.EZConfig as EZ
+import qualified XMonad.Util.Loggers as Log
 import qualified XMonad.Util.Run as Run
 
 
@@ -45,10 +47,11 @@ import qualified XMonad.Hooks.WorkspaceHistory as WH
 import qualified XMonad.Layout.CompactName as Compact
 
 
--- This configuration requires xmonad >=0.13.
-
-
-main = X.xmonad $ Docks.docks myXConfig
+main = X.xmonad $
+       Bar.dynamicSBs barSpawner $
+       Ewmh.setEwmhActivateHook Urg.doAskUrgent $
+       Ewmh.ewmh $
+       Docks.docks myXConfig
 
 {----------------
 -  Colors, &c.  -
@@ -70,11 +73,11 @@ mySeparatorFG = "#000066"
 mySeparatorBG = "#000033"
 myCopyFG      = "#ff0000"
 
-myFont = "xft:Hack-12"
+myFont = "xft:DejaVu Sans Mono:pixelsize=16"
 
 myTerminal        = "urxvt"
 myModMask         = X.mod4Mask
-myExternalMonitor = "HDMI-1"
+myExternalMonitor = "HDMI-A-0"
 myVLCSock         = "/tmp/vlc.sock"
 
 {------------------------------
@@ -114,8 +117,8 @@ myKeyBindings =
   -- Change workspaces.
   , ("M-a", workspaceLeaveWrapper Urg.focusUrgent)
   , ("M-S-a", Urg.clearUrgents >> THook.runLogHook)
-  , ("M-<R>", workspaceLeaveWrapper $ Cycle.moveTo Cycle.Next Cycle.HiddenNonEmptyWS)
-  , ("M-<L>", workspaceLeaveWrapper $ Cycle.moveTo Cycle.Prev Cycle.HiddenNonEmptyWS)
+  , ("M-<R>", workspaceLeaveWrapper $ Cycle.moveTo Cycle.Next hiddenNonEmptyWS)
+  , ("M-<L>", workspaceLeaveWrapper $ Cycle.moveTo Cycle.Prev hiddenNonEmptyWS)
   , ("M-s", workspaceLeaveWrapper toggleNonEmptyWS)
   , ("M-d", actOnNonEmptyWorkspace goToWorkspace)
   -- Dynamic workspaces.
@@ -133,18 +136,19 @@ myKeyBindings =
   , ("M-x M-x", X.spawn "~/bin/xlock")
   , ("M-x s", X.spawn "~/bin/suspend")
   -- Media, &c. keys.
-  , ("<XF86AudioMute>" , X.spawn "amixer set Master toggle")
-  , ("M-<F6>"          , X.spawn "amixer set Master toggle")
-  , ("S-<XF86AudioMute>" , X.spawn "amixer set Master 0")
-  , ("M-S-<F6>"          , X.spawn "amixer set Master 0")
-  , ("<XF86AudioLowerVolume>" , X.spawn "amixer set Master 1%-")
-  , ("M-<F7>"                 , X.spawn "amixer set Master 1%-")
-  , ("S-<XF86AudioLowerVolume>" , X.spawn "amixer set Master 10%-")
-  , ("M-S-<F7>"                 , X.spawn "amixer set Master 10%-")
-  , ("<XF86AudioRaiseVolume>" , X.spawn "amixer set Master 1%+")
-  , ("M-<F8>"                 , X.spawn "amixer set Master 1%+")
-  , ("S-<XF86AudioRaiseVolume>" , X.spawn "amixer set Master 10%+")
-  , ("M-S-<F8>"                 , X.spawn "amixer set Master 10%+")
+  , ("<XF86AudioMute>" , X.spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
+  , ("M-<F6>"          , X.spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
+  , ("S-<XF86AudioMute>" , X.spawn "pactl set-sink-volume @DEFAULT_SINK@ 0")
+  , ("M-S-<F6>"          , X.spawn "pactl set-sink-volume @DEFAULT_SINK@ 0")
+  , ("<XF86AudioLowerVolume>" , X.spawn "pactl set-sink-volume @DEFAULT_SINK@ -1%")
+  , ("M-<F7>"                 , X.spawn "pactl set-sink-volume @DEFAULT_SINK@ -1%")
+  , ("S-<XF86AudioLowerVolume>" , X.spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%")
+  , ("M-S-<F7>"                 , X.spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%")
+  , ("<XF86AudioRaiseVolume>" , X.spawn "pactl set-sink-volume @DEFAULT_SINK@ +1%")
+  , ("M-<F8>"                 , X.spawn "pactl set-sink-volume @DEFAULT_SINK@ +1%")
+  , ("S-<XF86AudioRaiseVolume>" , X.spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
+  , ("M-S-<F8>"                 , X.spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
+  , ("<XF86AudioMicMute>", X.spawn "pactl set-source-mute @DEFAULT_SOURCE@ toggle")
   , ("M-M1-<Space>", X.catchIO $ VLC.pause myVLCSock)
   , ("M-M1-S-<L>", X.catchIO $ VLC.prev myVLCSock)
   , ("M-M1-S-<R>", X.catchIO $ VLC.next myVLCSock)
@@ -157,13 +161,14 @@ myKeyBindings =
   , ("<XF86MonBrightnessUp>", X.spawn "xbacklight -steps 1 -time 0 -inc 2")
   , ("S-<XF86MonBrightnessUp>", X.spawn "xbacklight -inc 10")
   -- Screenshots.
-  , ("<Print>", X.spawn "~/bin/screenshot")
+  , ("<Print>", X.spawn "flameshot gui")
+  , ("S-<Print> s", X.spawn "~/bin/screenshot")
   , ("S-<Print> w", X.spawn "~/bin/screenshot window")
   , ("S-<Print> r", X.spawn "~/bin/screenshot root")
   -- Miscellaneous utilities.
   , ("M1-<Space>", X.spawn "urxvt -e alsamixer")
-  , ("M-M1-f", X.spawn "/usr/bin/kill -SIGSTOP firefox")
-  , ("M-M1-S-f", X.spawn "/usr/bin/kill -SIGCONT firefox")
+  , ("M-M1-1", X.spawn "sct")
+  , ("M-M1-2", X.spawn "sct 4500")
   , ("M-x q", X.spawn "xmonad --recompile && xmonad --restart")
   , ("M-C-M1-S-x q", X.io (exitWith ExitSuccess))
   ]
@@ -208,27 +213,26 @@ myMouseBindings = fromList
 -  Status bar  -
 ---------------}
 
-myLogPP :: DLog.PP
-myLogPP = DLog.def
-  { DLog.ppCurrent = DLog.xmobarColor myCurrentFG myCurrentBG . DLog.pad
-  , DLog.ppVisible = DLog.xmobarColor myVisibleFG myVisibleBG . DLog.pad
-  , DLog.ppHidden  = DLog.xmobarColor myNormalFG myNormalBG
-  , DLog.ppUrgent  = DLog.xmobarColor myUrgentFG myUrgentBG . DLog.wrap ">" "<" . DLog.xmobarStrip
-  , DLog.ppTitle   = DLog.xmobarColor mySpecial1FG mySpecial1BG . DLog.shorten 75
-  , DLog.ppLayout  = DLog.xmobarColor mySpecial2FG mySpecial2BG
-  , DLog.ppSep     = DLog.pad $ DLog.xmobarColor mySeparatorFG mySeparatorBG "|"
-  }
+xmobarProp :: X.ScreenId -> String
+xmobarProp (X.S sid) = "_XMONAD_LOG_" ++ (show sid)
 
-myLogPPActive :: DLog.PP
-myLogPPActive = myLogPP
-  { DLog.ppCurrent = DLog.xmobarColor myCurrentBG myCurrentFG . DLog.pad
-  }
+xmobarCmd :: X.ScreenId -> String
+xmobarCmd (X.S sid) = "xmobar --screen " ++ (show sid) ++ " ~/.xmonad/xmobarrc" ++ (show sid)
 
-barCreator :: Bars.DynamicStatusBar
-barCreator (X.S sid) = Run.spawnPipe $ "xmobar --screen " ++ show sid
+myLogPP :: X.ScreenId -> X.X Bar.PP.PP
+myLogPP sid = pure $ Bar.PP.def
+    { Bar.PP.ppCurrent = Bar.PP.xmobarColor myCurrentFG myCurrentBG . Bar.PP.pad
+    , Bar.PP.ppVisible = Bar.PP.xmobarColor myVisibleFG myVisibleBG . Bar.PP.pad
+    , Bar.PP.ppHidden  = Bar.PP.xmobarColor myNormalFG myNormalBG
+    , Bar.PP.ppUrgent  = Bar.PP.xmobarColor myUrgentFG myUrgentBG . Bar.PP.wrap ">" "<" . Bar.PP.xmobarStrip
+    , Bar.PP.ppSep     = " "
+    , Bar.PP.ppLayout  = Bar.PP.xmobarColor mySpecial2FG mySpecial2BG
+    , Bar.PP.ppOrder   = \(ws:ly:_:lg) -> [ws, ly] ++ lg
+    , Bar.PP.ppExtras  = [Log.xmobarColorL mySpecial1FG mySpecial1BG $ Log.logTitleOnScreen sid]
+    }
 
-barDestroyer :: Bars.DynamicStatusBarCleanup
-barDestroyer = return ()
+barSpawner :: X.ScreenId -> IO Bar.StatusBarConfig
+barSpawner sid = pure $ Bar.statusBarPropTo (xmobarProp sid) (xmobarCmd sid) (myLogPP sid)
 
 {-------------------------
 -  Workspaces & layouts  -
@@ -266,6 +270,9 @@ allNonEmptyWorkspaces = workspaceTags . filter (isJust . W.stack) . allWorkspace
 -- Go back to the last visited workspace that currently has any windows.
 toggleNonEmptyWS :: X.X ()
 toggleNonEmptyWS = X.withWindowSet $ Cycle.toggleWS' . allEmptyWorkspaces
+
+hiddenNonEmptyWS :: Cycle.WSType
+hiddenNonEmptyWS = Cycle.hiddenWS Cycle.:&: Cycle.Not Cycle.emptyWS
 
 -- This name is a bit misleading, as the suggestions given are all the
 -- non-empty workspaces, but it's possible to act on any arbitrary
@@ -332,7 +339,7 @@ myXConfig =
   let uHook = Urg.BorderUrgencyHook
                 { Urg.urgencyBorderColor = myUrgentBG
                 }
-      uConf = Urg.urgencyConfig
+      uConf = X.def
                 { Urg.suppressWhen = Urg.OnScreen
                 }
       man   = X.composeAll
@@ -355,10 +362,7 @@ myXConfig =
      conf
        { X.startupHook = do EZ.checkKeymap conf myKeyBindings
                             Cur.setDefaultCursor Cur.xC_crosshair
-                            Bars.dynStatusBarStartup barCreator barDestroyer
        , X.logHook     = do WH.workspaceHistoryHook
-                            Bars.multiPP myLogPPActive myLogPP
-       , X.handleEventHook = Bars.dynStatusBarEventHook barCreator barDestroyer
        }
 
 myGSConfig :: Grid.GSConfig X.WorkspaceId

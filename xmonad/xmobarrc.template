@@ -1,0 +1,18 @@
+Config { bgColor = "black"
+       , fgColor = "grey"
+       , font = "DejaVu Sans Mono 10"
+       , lowerOnStart = True
+       , position = Top
+       , commands = [ Run Date "%V-%a %Y-%m-%d %H:%M:%S" "date" 10
+                    , Run BatteryP ["BAT0"] [ "-t", "<left> (<timeleft> @ <watts>W)"
+                                            , "-H", "50"
+                                            , "-L", "15"
+                                            , "-n", "orange"
+                                            , "-l", "red"
+                                            , "--"
+                                            , "-P"
+                                            ] 50
+                    , Run XPropertyLog "_XMONAD_LOG_?"
+                    ]
+       , template = "} %_XMONAD_LOG_?% { %battery% <fc=#aaffaa>%date%</fc>"
+       }

@@ -2,8 +2,6 @@
 *.swo
 *.swp
 
-/tags
+.idea
 
 .DS_Store
-
-__pycache__/

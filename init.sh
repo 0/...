@@ -28,9 +28,13 @@ fi
 #ln -sT "$DOTFILES"/vim ~/.vim
 #ln -sT "$DOTFILES"/xmonad ~/.xmonad
 #ln -sT "$DOTFILES"/xscreensaver ~/.xscreensaver
-#ln -sT "$DOTFILES"/zshrc ~/.zshrc
+#ln -sT "$DOTFILES"/zsh ~/.zsh
+#ln -sT "$DOTFILES"/zsh/zprofile ~/.zprofile
+#ln -sT "$DOTFILES"/zsh/zshrc ~/.zshrc
 
 #cp -n "$DOTFILES"/gitconfig.local.example ~/.gitconfig.local
+#cp -n "$DOTFILES"/zsh/zprofile.local.example ~/.zprofile.local
+#cp -n "$DOTFILES"/zsh/zshrc.local.example ~/.zshrc.local
 
 #mkdir -p ~/.ssh
 #cp -n "$DOTFILES"/ssh/config.example ~/.ssh/config
